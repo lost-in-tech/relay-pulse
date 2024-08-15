@@ -37,6 +37,12 @@ public sealed class IocFixture
         return result;
     }
 
+    public (int, BasicPublishInput<T>) GetRabbitMqPublishCallInfo<T>()
+    {
+        var gotInput = GetRequiredService<IRabbitMqWrapper, FakeRabbitMqWrapper>();
+        return (gotInput.GetPublishExecutionCount(), gotInput.GetLastUsedPublishInput<T>());
+    }
+    
     public T GetRequiredService<T>() where T : class
     {
         return _sp.GetRequiredService<T>();

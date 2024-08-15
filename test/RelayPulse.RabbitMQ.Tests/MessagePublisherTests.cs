@@ -16,14 +16,24 @@ public class MessagePublisherTests(IocFixture fixture) : IClassFixture<IocFixtur
     {
         var sut = fixture.GetRequiredService<IMessagePublisher>();
 
-        var rsp = await sut.Content(new { Id = "123" })
+        var rsp = await sut.Content(new OrderCreated
+            {
+                Id = "123"
+            })
             .Publish();
-        
+
         rsp.ShouldBeTrue();
-        var gotInput = fixture.GetRequiredService<IRabbitMqWrapper, FakeRabbitMqWrapper>();
-        gotInput.LastInput.ShouldNotBeNull();
-        gotInput.LastInput.Exchange.ShouldBe("bookworm.events");
-        gotInput.TotalExecutionCount.ShouldBe(1);
+
+        var (count, gotPublishInput) = fixture.GetRabbitMqPublishCallInfo<OrderCreated>();
+
+        gotPublishInput.ShouldSatisfyAllConditions
+        (
+            () => count.ShouldBe(1),
+            () => gotPublishInput.Exchange.ShouldBe("bookworm.events"),
+            () => gotPublishInput.Type.ShouldBe(typeof(OrderCreated).FullName),
+            () => gotPublishInput.MsgId.ShouldNotBeEmpty(),
+            () => gotPublishInput.Body.Id.ShouldBe("123")
+        );
     }
 
     public record OrderCreated
