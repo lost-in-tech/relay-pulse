@@ -79,7 +79,7 @@ jobs:
         uses: actions/github-script@v3
         with:
           script: |
-            core.setFailed('Coverage test below tolerance')    
+            core.setFailed('Coverage test below tolerance ${{ steps.get_line_rate.outputs.lineRate }}')    
 
   deploy:
     # Publish only when creating a GitHub Release
