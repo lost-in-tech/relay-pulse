@@ -36,6 +36,8 @@ public static class IocSetup
             services.TryAddSingleton<IRabbitMqConnectionSettings>(options.Settings);
         }
         
+        services.TryAddSingleton<BasicPropertiesBuilder>();
+        services.TryAddSingleton<IUniqueId, UniqueId>();
         services.TryAddSingleton<IMessagePublisher, MessagePublisher>();
         services.TryAddSingleton<IChannelInstance, ChannelInstance>();
         services.TryAddSingleton<IRabbitMqWrapper, RabbitMqWrapper>();

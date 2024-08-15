@@ -24,15 +24,15 @@ public class MessagePublisherTests(IocFixture fixture) : IClassFixture<IocFixtur
 
         rsp.ShouldBeTrue();
 
-        var (count, gotPublishInput) = fixture.GetRabbitMqPublishCallInfo<OrderCreated>();
+        var gotCallInfo = fixture.GetRabbitMqPublishCallInfo<OrderCreated>();
 
-        gotPublishInput.ShouldSatisfyAllConditions
+        gotCallInfo.ShouldSatisfyAllConditions
         (
-            () => count.ShouldBe(1),
-            () => gotPublishInput.Exchange.ShouldBe("bookworm.events"),
-            () => gotPublishInput.Type.ShouldBe(typeof(OrderCreated).FullName),
-            () => gotPublishInput.MsgId.ShouldNotBeEmpty(),
-            () => gotPublishInput.Body.Id.ShouldBe("123")
+            () => gotCallInfo.ExecutionCount.ShouldBe(1),
+            () => gotCallInfo.LastInput!.Exchange.ShouldBe("bookworm.events"),
+            () => gotCallInfo.LastInput!.BasicProperties.Type.ShouldBe(typeof(OrderCreated).FullName),
+            () => gotCallInfo.LastInput!.BasicProperties.MessageId.ShouldNotBeEmpty(),
+            () => gotCallInfo.Body!.Id.ShouldBe("123")
         );
     }
 

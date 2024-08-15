@@ -1,42 +1,39 @@
+using System.Text;
+using System.Text.Unicode;
 using RabbitMQ.Client;
 
 namespace RelayPulse.RabbitMQ.Tests.Fakes;
 
-public class FakeRabbitMqWrapper : IRabbitMqWrapper
+public class FakeRabbitMqWrapper(IMessageSerializer serializer) : IRabbitMqWrapper
 {
-    private BasicPublishInput<object>? _lastPublishInput;
+    private BasicPublishInput? _lastPublishInput;
     private int _totalPublishExecutionCount;
 
-    public BasicPublishInput<T> GetLastUsedPublishInput<T>() => new()
+    public RabbitMqPublishCallInfo<T> GetLastUsedPublishInput<T>()
     {
-        Body = (T)(_lastPublishInput!.Body),
-        Exchange = _lastPublishInput.Exchange,
-        RoutingKey = _lastPublishInput.RoutingKey,
-        Cid = _lastPublishInput.Cid,
-        Type = _lastPublishInput.Type,
-        AppId = _lastPublishInput.AppId,
-        MsgId = _lastPublishInput.MsgId,
-        Headers = _lastPublishInput.Headers,
-        UserId = _lastPublishInput.UserId
-    };
+        if (_lastPublishInput == null) return new RabbitMqPublishCallInfo<T>();
+        
+        return new RabbitMqPublishCallInfo<T>
+        {
+            Body = serializer.Deserialize<T>(Encoding.UTF8.GetString(_lastPublishInput.Body.ToArray())),
+            ExecutionCount = _totalPublishExecutionCount,
+            LastInput = _lastPublishInput
+        };
+    }
 
     public int GetPublishExecutionCount() => _totalPublishExecutionCount;
     
-    public void BasicPublish<T>(IModel channel, BasicPublishInput<T> input)
+    public void BasicPublish(IModel channel, BasicPublishInput input)
     {
-        _lastPublishInput = new BasicPublishInput<object>
-        {
-            Body = input.Body!,
-            Exchange = input.Exchange,
-            RoutingKey = input.RoutingKey,
-            Cid = input.Cid,
-            Type = input.Type,
-            AppId = input.AppId,
-            MsgId = input.MsgId,
-            Headers = input.Headers,
-            UserId = input.UserId
-        };
+        _lastPublishInput = input;
         
         _totalPublishExecutionCount++;
     }
+}
+
+public class RabbitMqPublishCallInfo<T>
+{
+    public int ExecutionCount { get; init; }
+    public BasicPublishInput? LastInput { get; init; }
+    public T? Body { get; init; }
 }

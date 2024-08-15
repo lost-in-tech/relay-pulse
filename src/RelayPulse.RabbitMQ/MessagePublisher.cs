@@ -1,4 +1,5 @@
-﻿using RelayPulse.Core;
+﻿using System.Text;
+using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ;
 
@@ -6,14 +7,15 @@ internal sealed class MessagePublisher(
     IRabbitMqWrapper rabbitMqWrapper,
     IMessagePublishSettings settings,
     IChannelInstance channelInstance,
-    IEnumerable<IMessageFilter> filters) 
+    IMessageSerializer serializer,
+    BasicPropertiesBuilder basicPropertiesBuilder,
+    IEnumerable<IMessageFilter> filters)
     : IMessagePublisher
 {
     public Task<bool> Publish<T>(Message<T> msg, CancellationToken ct)
     {
         var type = typeof(T);
         var typeName = type.FullName ?? type.Name;
-        var channel = channelInstance.GetOrCreate(typeName);
 
         foreach (var filter in filters)
         {
@@ -26,22 +28,20 @@ internal sealed class MessagePublisher(
         {
             throw new Exception("Exchange name cannot be empty. Make sure you provide exchange name.");
         }
-        
-        rabbitMqWrapper.BasicPublish(channel, new BasicPublishInput<T>
+
+        var channel = channelInstance.GetOrCreate(typeName);
+        rabbitMqWrapper.BasicPublish(channel, new BasicPublishInput
         {
-            Body = msg.Content,
+            Body = Encoding.UTF8.GetBytes(serializer.Serialize(msg.Content)),
             Exchange = exchange,
             RoutingKey = PopValue(msg.Headers, Constants.HeaderRoutingKey) ?? string.Empty,
-            Cid = msg.Cid,
-            Type = msg.Type,
-            AppId = msg.AppId,
-            MsgId = msg.Id ?? Guid.NewGuid().ToString(),
-            UserId = msg.UserId,
-            Headers = BuildHeaders(msg.Headers)
+            BasicProperties = basicPropertiesBuilder.Build(channel, msg)
         });
 
         return Task.FromResult(true);
     }
+
+    
 
     public Task<bool> Publish<T>(T content, CancellationToken ct)
     {
@@ -61,10 +61,10 @@ internal sealed class MessagePublisher(
         {
             result[kv.Key] = kv.Value;
         }
-        
+
         return result;
     }
-    
+
     private string? PopValue(Dictionary<string, string>? headers, string key)
     {
         if (headers == null) return null;
@@ -77,5 +77,4 @@ internal sealed class MessagePublisher(
 internal interface IMessagePublishSettings
 {
     public string DefaultExchange { get; }
-    
 }
