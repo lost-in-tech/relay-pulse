@@ -16,18 +16,23 @@ public static class IocSetup
 
         services.Configure<RabbitMqSettings>(configuration.GetSection(options.ConfigSectionName));
 
-        
-        if (options.Settings == null)
+        if (string.IsNullOrWhiteSpace(options.Settings?.Uri))
         {
             services.TryAddSingleton<IRabbitMqConnectionSettings>(sc =>
-                sc.GetRequiredService<IOptions<RabbitMqSettings>>().Value);
-            
-            services.TryAddSingleton<IMessagePublishSettings>(sc => 
                 sc.GetRequiredService<IOptions<RabbitMqSettings>>().Value);
         }
         else
         {
             services.TryAddSingleton<IMessagePublishSettings>(options.Settings);
+        }
+
+        if (string.IsNullOrWhiteSpace(options.Settings?.DefaultExchange))
+        {
+            services.TryAddSingleton<IMessagePublishSettings>(sc => 
+                sc.GetRequiredService<IOptions<RabbitMqSettings>>().Value);
+        }
+        else
+        {
             services.TryAddSingleton<IRabbitMqConnectionSettings>(options.Settings);
         }
         

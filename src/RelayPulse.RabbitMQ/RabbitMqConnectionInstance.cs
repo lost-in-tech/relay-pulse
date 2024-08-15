@@ -20,6 +20,9 @@ internal sealed class RabbitMqConnectionInstance : IRabbitMqConnectionInstance
     {
         _instance = new Lazy<IConnection>(() =>
         {
+            if (string.IsNullOrWhiteSpace(settings.Uri))
+                throw new Exception("No connection string provided for rabbitmq");
+            
             var factory = new ConnectionFactory
             {
                 DispatchConsumersAsync = true,
