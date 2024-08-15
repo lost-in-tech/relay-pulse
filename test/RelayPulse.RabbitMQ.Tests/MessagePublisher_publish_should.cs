@@ -31,6 +31,27 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
             () => gotCallInfo.Body!.Id.ShouldBe("123")
         );
     }
+    
+    [Fact]
+    public async Task send_to_exchange_when_provided()
+    {
+        var sut = fixture.GetRequiredService<IMessagePublisher>();
+        var givenExchange = "test-exchange";
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+        
+        var rsp = await sut.Message(givenMsg)
+                            .Exchange(givenExchange)
+                            .Publish();
+
+        rsp.ShouldBeTrue();
+
+        var gotCallInfo = fixture.GetRabbitMqPublishCallInfo<OrderCreated>();
+        
+        gotCallInfo.LastInput!.Exchange.ShouldBe(givenExchange);
+    }
 
     public record OrderCreated
     {
