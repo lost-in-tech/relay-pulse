@@ -64,7 +64,22 @@ jobs:
         with:
           dotnet-version: 8.x
       - name: Run tests
-        run: dotnet test --configuration Release
+        run: dotnet test --configuration Release --collect:"XPlat Code Coverage"
+      - name: Get Line Rate from output
+        id: get_line_rate
+        shell: pwsh
+        run: |
+          $covreport = get-childitem -Filter coverage.cobertura.xml -Recurse | Sort-Object -Descending -Property LastWriteTime -Top 1
+          Write-Output $covreport.FullName
+          [xml]$covxml = Get-Content -Path $covreport.FullName
+          $lineRate = $covxml.coverage.'line-rate'
+          Write-Output "::set-output name=lineRate::$lineRate"
+      - name: Check coverage tolerance
+        if: ${{ steps.get_line_rate.outputs.lineRate < 0.9 }}
+        uses: actions/github-script@v3
+        with:
+          script: |
+            core.setFailed('Coverage test below tolerance')    
 
   deploy:
     # Publish only when creating a GitHub Release
