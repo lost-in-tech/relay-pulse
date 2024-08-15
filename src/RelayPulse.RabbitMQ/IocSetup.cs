@@ -38,7 +38,7 @@ public static class IocSetup
         
         services.TryAddSingleton<BasicPropertiesBuilder>();
         services.TryAddSingleton<IUniqueId, UniqueId>();
-        services.TryAddSingleton<IMessagePublisher, MessagePublisherPublish>();
+        services.TryAddSingleton<IMessagePublisher, MessagePublisher>();
         services.TryAddSingleton<IChannelInstance, ChannelInstance>();
         services.TryAddSingleton<IRabbitMqWrapper, RabbitMqWrapper>();
         services.TryAddSingleton<IMessageSerializer,MessageSerializer>();

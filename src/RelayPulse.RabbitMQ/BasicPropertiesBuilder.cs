@@ -31,7 +31,7 @@ internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
             prop.CorrelationId = msg.Cid;
         }
 
-        prop.MessageId = msg.Id ?? uniqueId.New().ToString();
+        prop.MessageId = (msg.Id ?? uniqueId.New()).ToString();
 
         if (msg.Headers.Count > 0)
         {

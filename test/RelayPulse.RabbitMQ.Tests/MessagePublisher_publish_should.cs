@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using RelayPulse.Core;
 using RelayPulse.RabbitMQ.Tests.Fakes;
 using Shouldly;
@@ -9,18 +10,22 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
     [Fact]
     public async Task send_correct_payload_to_rabbit_mq_when_only_event_payload_provided()
     {
-        var sut = fixture.GetRequiredService<IMessagePublisher>();
-
+        // Arrange
+        var services = fixture.Services();
+        
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
         
+        // Act
         var rsp = await sut.Publish(givenMsg);
+        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
+        // Assert
         rsp.ShouldBeTrue();
-
-        var gotCallInfo = fixture.GetRabbitMqPublishCallInfo<OrderCreated>();
 
         gotCallInfo.ShouldSatisfyAllConditions
         (
@@ -33,9 +38,13 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
     }
     
     [Fact]
-    public async Task send_to_exchange_when_provided()
+    public async Task use_exchange_that_provided_in_input()
     {
-        var sut = fixture.GetRequiredService<IMessagePublisher>();
+        var services = fixture.Services();
+        
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        
         var givenExchange = "test-exchange";
         var givenMsg = new OrderCreated
         {
@@ -48,10 +57,35 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
 
         rsp.ShouldBeTrue();
 
-        var gotCallInfo = fixture.GetRabbitMqPublishCallInfo<OrderCreated>();
+        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
         
         gotCallInfo.LastInput!.Exchange.ShouldBe(givenExchange);
     }
+    
+    [Fact]
+    public async Task use_routing_key_that_provided_in_input()
+    {
+        var services = fixture.Services();
+        
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        var giveRoutingKey = "test-route-key";
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+        
+        var rsp = await sut.Message(givenMsg)
+            .Routing(giveRoutingKey)
+            .Publish();
+
+        rsp.ShouldBeTrue();
+
+        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+        
+        gotCallInfo.LastInput!.RoutingKey.ShouldBe(giveRoutingKey);
+    }
+    
 
     public record OrderCreated
     {

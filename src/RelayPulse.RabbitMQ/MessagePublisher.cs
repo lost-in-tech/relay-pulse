@@ -3,7 +3,7 @@ using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ;
 
-internal sealed class MessagePublisherPublish(
+internal sealed class MessagePublisher(
     IRabbitMqWrapper rabbitMqWrapper,
     IMessagePublishSettings settings,
     IChannelInstance channelInstance,

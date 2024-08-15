@@ -9,9 +9,7 @@ namespace RelayPulse.RabbitMQ.Tests.Fakes;
 
 public sealed class IocFixture
 {
-    private readonly IServiceProvider _sp;
-    
-    public IocFixture()
+    public IServiceProvider Services(Action<IServiceCollection>? setup = null)
     {
         var config = new ConfigurationBuilder().Build();
         var sc = new ServiceCollection();
@@ -23,32 +21,13 @@ public sealed class IocFixture
                 DefaultExchange = "bookworm.events"
             }
         });
-        sc.Replace(ServiceDescriptor.Scoped<IUniqueId, FakeUniqueId>());
-        sc.Replace(ServiceDescriptor.Scoped<IRabbitMqWrapper, FakeRabbitMqWrapper>());
-        sc.Replace(ServiceDescriptor.Scoped<IRabbitMqConnectionInstance, FakeRabbitMqConnectionInstance>());
-        _sp = sc.BuildServiceProvider();
-    }
-
-    public T GetFakeService<T>() where T : class
-    {
-        var result = _sp.GetRequiredService<T>();
-        result.ClearSubstitute();
-        result.ClearReceivedCalls();
-        return result;
-    }
-
-    public RabbitMqPublishCallInfo<T> GetRabbitMqPublishCallInfo<T>()
-    {
-        return GetRequiredService<IRabbitMqWrapper, FakeRabbitMqWrapper>().GetLastUsedPublishInput<T>();
-    }
-    
-    public T GetRequiredService<T>() where T : class
-    {
-        return _sp.GetRequiredService<T>();
-    }
-
-    public TImpl GetRequiredService<TInterface,TImpl>() where TImpl : TInterface where TInterface : notnull
-    {
-        return (TImpl)_sp.GetRequiredService<TInterface>();
+        
+        setup?.Invoke(sc);
+        
+        sc.Replace(ServiceDescriptor.Singleton<IUniqueId, FakeUniqueId>());
+        sc.Replace(ServiceDescriptor.Singleton<IRabbitMqWrapper, FakeRabbitMqWrapper>());
+        sc.Replace(ServiceDescriptor.Singleton<IRabbitMqConnectionInstance, FakeRabbitMqConnectionInstance>());
+        
+        return sc.BuildServiceProvider();
     }
 }

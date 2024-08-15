@@ -29,6 +29,8 @@ public class FakeRabbitMqWrapper(IMessageSerializer serializer) : IRabbitMqWrapp
         
         _totalPublishExecutionCount++;
     }
+
+    public static FakeRabbitMqWrapper New() => new(new MessageSerializer());
 }
 
 public class RabbitMqPublishCallInfo<T>
