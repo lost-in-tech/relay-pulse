@@ -23,7 +23,7 @@ public sealed class IocFixture
                 DefaultExchange = "bookworm.events"
             }
         });
-
+        sc.Replace(ServiceDescriptor.Scoped<IUniqueId, FakeUniqueId>());
         sc.Replace(ServiceDescriptor.Scoped<IRabbitMqWrapper, FakeRabbitMqWrapper>());
         sc.Replace(ServiceDescriptor.Scoped<IRabbitMqConnectionInstance, FakeRabbitMqConnectionInstance>());
         _sp = sc.BuildServiceProvider();

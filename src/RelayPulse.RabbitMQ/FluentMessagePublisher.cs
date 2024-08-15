@@ -87,7 +87,7 @@ internal sealed class FluentMessagePublisher<T>(IMessagePublisher publisher, Mes
 
 public static class MessagePublisherExtensions
 {
-    public static IHaveMessageContent Content<T>(this IMessagePublisher publisher, T content)
+    public static IHaveMessageContent Message<T>(this IMessagePublisher publisher, T content)
         => new FluentMessagePublisher<T>(publisher, new Message<T>
         {
             Content = content
