@@ -93,6 +93,13 @@ public static class MessagePublisherExtensions
             Content = content
         });
     
+    public static IHaveMessageContent Message<T>(this IMessagePublisher publisher, Guid id, T content)
+        => new FluentMessagePublisher<T>(publisher, new Message<T>
+        {
+            Id = id,
+            Content = content
+        });
+    
     public static IHaveMessageContent Message<T>(this IMessagePublisher publisher, Message<T> msg)
         => new FluentMessagePublisher<T>(publisher, msg);
 }

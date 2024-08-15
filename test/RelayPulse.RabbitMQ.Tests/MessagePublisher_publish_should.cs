@@ -86,6 +86,76 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         gotCallInfo.LastInput!.RoutingKey.ShouldBe(giveRoutingKey);
     }
     
+    [Fact]
+    public async Task use_message_id_that_provided_in_input()
+    {
+        var services = fixture.Services();
+        
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+        
+        var rsp = await sut
+                    .Message(Constants.FixedGuidTwo, givenMsg)
+                    .Publish();
+
+        rsp.ShouldBeTrue();
+
+        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+        
+        gotCallInfo.LastInput!.BasicProperties.MessageId.ShouldBe(Constants.FixedGuidTwo.ToString());
+    }
+    
+    [Fact]
+    public async Task use_value_provided_by_filter()
+    {
+        var services = fixture.Services(sc =>
+        {
+            sc.AddTransient<IMessageFilter, SampleFilter>();
+        });
+        
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+        
+        var rsp = await sut
+            .Message(Constants.FixedGuidTwo, givenMsg)
+            .Publish();
+
+        rsp.ShouldBeTrue();
+
+        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+
+        var basicProperties = gotCallInfo.LastInput!.BasicProperties;
+        
+        basicProperties.ShouldSatisfyAllConditions(
+            () => basicProperties.UserId.ShouldBe("user-1"),
+            () => basicProperties.AppId.ShouldBe("app-id"),
+            () => basicProperties.Type.ShouldBe($"bookworm.{nameof(OrderCreated).ToLowerInvariant()}"),
+            () => basicProperties.CorrelationId.ShouldBe("cid")
+        );
+    }
+    
+    
+    public class SampleFilter : IMessageFilter
+    {
+        public Message<T> Apply<T>(Message<T> msg)
+        {
+            return msg with
+            {
+                AppId = "app-id",
+                Cid = "cid",
+                Type = $"bookworm.{typeof(T).Name.ToLowerInvariant()}",
+                UserId = "user-1"
+            };
+        }
+    }
 
     public record OrderCreated
     {
