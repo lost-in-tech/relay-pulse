@@ -13,8 +13,7 @@ sc.AddRabbitMqRelayPulse(config, new RabbitMqRelayHubOptions
     Settings = new RabbitMqSettings
     {
         Uri = "amqp://guest:guest@localhost:5672/",
-        DefaultExchange = "bookworm-events",
-        TypePrefix = "Bookworm-"
+        DefaultExchange = "bookworm-events"
     }
 });
 
@@ -25,7 +24,7 @@ var publisher = sp.GetRequiredService<IMessagePublisher>();
 await publisher.Message(new OrderCreated
 {
     Id = "order-123"
-}).Expiry(5).AppId("api-bookworm").Publish();
+}).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
 
 
 Console.WriteLine("Hello, World!");

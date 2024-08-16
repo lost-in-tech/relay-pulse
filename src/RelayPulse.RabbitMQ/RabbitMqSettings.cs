@@ -9,6 +9,8 @@ public record RabbitMqSettings :
     public string Uri { get; init; } = string.Empty;
     public string DefaultExchange { get; init; } = string.Empty;
     
+    public string? DefaultTenant { get; init; }
+    
     /// <summary>
     /// Type prefix to use for type name that system gonna pass in header 
     /// </summary>

@@ -2,6 +2,7 @@ namespace RelayPulse.Core.Fluent;
 
 public interface IHaveMessage :
     ICollectTypeName,
+    ICollectTenant,
     ICollectHeaders,
     ICollectUserId,
     ICollectAppId,
@@ -16,6 +17,7 @@ public interface ICollectTypeName
 }
 
 public interface IHaveTypeName :
+    ICollectTenant,
     ICollectHeaders,
     ICollectUserId,
     ICollectAppId,
@@ -23,6 +25,19 @@ public interface IHaveTypeName :
     IPublishMessage
 {
 }
+
+public interface ICollectTenant
+{
+    IHaveTenant Tenant(string tenant);
+}
+
+public interface IHaveTenant :
+    ICollectHeaders,
+    ICollectUserId,
+    ICollectAppId,
+    ICollectCid,
+    IPublishMessage
+{}
 
 public interface ICollectHeaders
 {
@@ -77,6 +92,7 @@ public interface IPublishMessage
 
 internal class FluentMessagePublisher<T>(IMessagePublisher publisher, T msg, Guid? id) :
     IHaveTypeName,
+    IHaveTenant,
     IHaveHeaders,
     IHaveAppId,
     IHaveUserId,
@@ -87,6 +103,7 @@ internal class FluentMessagePublisher<T>(IMessagePublisher publisher, T msg, Gui
     private string? _type;
     private string? _cid;
     private string? _userId;
+    private string? _tenant;
     private Dictionary<string, string> _headers = new();
 
     public Task<bool> Publish(CancellationToken ct = default)
@@ -99,7 +116,8 @@ internal class FluentMessagePublisher<T>(IMessagePublisher publisher, T msg, Gui
             AppId = _appId,
             Cid = _cid,
             Type = _type,
-            Id = id
+            Id = id,
+            Tenant = _tenant
         }, ct);
     }
 
@@ -145,6 +163,12 @@ internal class FluentMessagePublisher<T>(IMessagePublisher publisher, T msg, Gui
     public IHaveCid Cid(string cid)
     {
         _cid = cid;
+        return this;
+    }
+
+    public IHaveTenant Tenant(string tenant)
+    {
+        _tenant = tenant;
         return this;
     }
 }

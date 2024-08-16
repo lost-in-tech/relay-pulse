@@ -7,4 +7,5 @@ internal static class Constants
     public const string HeaderExpiryKey = "_relayhub_expiry";
 
     public const string HeaderMsgType = "rp-msg-type";
+    public const string HeaderTenant = "rp-tenant";
 }

@@ -17,6 +17,12 @@ internal sealed class MessagePublisher(
         var type = typeof(T);
         var fullTypeName = type.FullName ?? type.Name;
 
+        var tenant = msg.Tenant.TryPickNonEmpty(settings.DefaultTenant);
+        if (tenant.HasValue())
+        {
+            msg.Headers[Constants.HeaderTenant] = tenant;
+        }
+        
         foreach (var filter in filters)
         {
             msg = filter.Apply(msg);
@@ -89,6 +95,7 @@ internal sealed class MessagePublisher(
 
 internal interface IMessagePublishSettings
 {
+    public string? DefaultTenant { get; }
     public double? DefaultExpiryInSeconds { get; }
     public string? AppId { get; }
     public string DefaultExchange { get; }

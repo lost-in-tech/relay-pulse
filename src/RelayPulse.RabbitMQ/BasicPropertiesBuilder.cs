@@ -14,6 +14,7 @@ internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
         var prop = channel.CreateBasicProperties();
 
         prop.ContentEncoding = "utf-8";
+        prop.ContentType = "application/json";
 
         prop.Type = string.IsNullOrWhiteSpace(msg.Type) ? type : msg.Type;
 

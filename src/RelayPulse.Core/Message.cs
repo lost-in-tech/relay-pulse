@@ -10,6 +10,7 @@ public record Message<T>
     public string? Cid { get; init; }
     public string? UserId { get; init; }
     public string? Type { get; init; }
+    public string? Tenant { get; init; }
     public required T Content { get; init; }
     public Dictionary<string, string> Headers { get; init; } = new(StringComparer.OrdinalIgnoreCase);
 }
