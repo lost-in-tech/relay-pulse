@@ -23,4 +23,18 @@ public static class HaveMessageExtensions
     {
         return msg.Header(Constants.HeaderRoutingKey, routingKey);
     }
+    
+    
+    
+    public static IHaveHeaders Expiry(this IHaveMessage msg, double seconds) 
+        => msg.Header(Constants.HeaderExpiryKey, $"{seconds * 1000}");
+
+    public static IHaveHeaders Expiry(this IHaveHeaders msg, double seconds) 
+        => msg.Header(Constants.HeaderExpiryKey, $"{seconds * 1000}");
+
+    public static IHaveHeaders Expiry(this IHaveMessage msg, TimeSpan expiry) 
+        => msg.Expiry(expiry.TotalSeconds);
+
+    public static IHaveHeaders Expiry(this IHaveHeaders msg, TimeSpan expiry) 
+        => msg.Expiry(expiry.TotalSeconds);
 }

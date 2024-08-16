@@ -23,4 +23,21 @@ public static class MessageExtensions
     {
         return msg.Headers.GetValueOrDefault(Constants.HeaderRoutingKey);
     }
+    
+    public static void SetExpiry<T>(this Message<T> msg, double seconds)
+    {
+        msg.Headers[Constants.HeaderExpiryKey] = $"{seconds * 1000}";
+    }
+
+    public static void SetExpiry<T>(this Message<T> msg, TimeSpan expiry) =>
+        SetExpiry(msg, expiry.TotalSeconds);
+    
+    public static double? GetExpiryInSeconds<T>(this Message<T> msg)
+    {
+        var result = msg.Headers.GetValueOrDefault(Constants.HeaderExpiryKey);
+
+        if (result.HasValue()) return double.TryParse(result, out var expiry) ? expiry : null;
+
+        return null;
+    }
 }

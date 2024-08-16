@@ -10,7 +10,7 @@ public sealed class IocFixture
     {
         var config = new ConfigurationBuilder().Build();
         var sc = new ServiceCollection();
-        sc.AddRabbitMqRelayHub(config, new RabbitMqRelayHubOptions
+        sc.AddRabbitMqRelayPulse(config, new RabbitMqRelayHubOptions
         {
             Settings = RabbitMqSettingsBuilder.Build()
         });

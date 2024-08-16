@@ -16,16 +16,15 @@ internal sealed class MessagePublisher(
     {
         var type = typeof(T);
         var fullTypeName = type.FullName ?? type.Name;
-        var typeName = string.IsNullOrWhiteSpace(settings.TypePrefix) 
-                        ? fullTypeName
-                        : $"{settings.TypePrefix}{type.Name}";
+        
+        var typeName = $"{msg.AppId.EmptyAlternative("app")}/{settings.TypePrefix}{type.Name}";
 
         foreach (var filter in filters)
         {
             msg = filter.Apply(msg);
         }
 
-        msg.Headers[settings.MessageTypeHeaderName ?? Constants.HeaderMsgType] = typeName;
+        msg.Headers[settings.MessageTypeHeaderName.EmptyAlternative(Constants.HeaderMsgType)] = typeName.ToSnakeCase();
 
         var exchange = PopValue(msg.Headers, Constants.HeaderExchange) ?? settings.DefaultExchange;
 
@@ -42,13 +41,18 @@ internal sealed class MessagePublisher(
         }
         
         var channel = channelFactory.GetOrCreate(typeName);
+
+        var expiry = PopValueAsDouble(msg.Headers, Constants.HeaderExpiryKey);
         
         rabbitMqWrapper.BasicPublish(channel, new BasicPublishInput
         {
             Body = Encoding.UTF8.GetBytes(serializer.Serialize(msg.Content)),
             Exchange = exchange,
             RoutingKey = PopValue(msg.Headers, Constants.HeaderRoutingKey) ?? string.Empty,
-            BasicProperties = basicPropertiesBuilder.Build(channel, typeName, msg)
+            BasicProperties = basicPropertiesBuilder.Build(channel, 
+                fullTypeName, 
+                msg,
+                expiry)
         });
 
         return Task.FromResult(true);
@@ -64,20 +68,6 @@ internal sealed class MessagePublisher(
         }, ct);
     }
 
-    private Dictionary<string, object>? BuildHeaders(Dictionary<string, string>? source)
-    {
-        if (source == null) return null;
-
-        var result = new Dictionary<string, object>();
-
-        foreach (var kv in source)
-        {
-            result[kv.Key] = kv.Value;
-        }
-
-        return result;
-    }
-
     private string? PopValue(Dictionary<string, string>? headers, string key)
     {
         if (headers == null) return null;
@@ -85,10 +75,18 @@ internal sealed class MessagePublisher(
         if (result != null) headers.Remove(key);
         return result;
     }
+    
+    private double? PopValueAsDouble(Dictionary<string, string>? headers, string key)
+    {
+        var result = PopValue(headers, key);
+        if (result.HasValue()) return double.TryParse(result, out var longValue) ? longValue : null;
+        return null;
+    }
 }
 
 internal interface IMessagePublishSettings
 {
+    public string? AppId { get; }
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
     public string? MessageTypeHeaderName { get; }

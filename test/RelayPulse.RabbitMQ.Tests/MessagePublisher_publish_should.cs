@@ -61,7 +61,7 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         
         rsp.ShouldBeTrue();
         
-        callInfo.LastInput!.BasicProperties.Type.ShouldBe("test-OrderCreated");
+        callInfo.LastInput!.BasicProperties.Type.ShouldBe(typeof(OrderCreated).FullName ?? nameof(OrderCreated));
         callInfo.LastInput!.BasicProperties.Headers.ShouldContainKey(RabbitMQ.Constants.HeaderMsgType);
     }
     

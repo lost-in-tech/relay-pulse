@@ -7,7 +7,7 @@ namespace RelayPulse.RabbitMQ;
 
 public static class IocSetup
 {
-    public static IServiceCollection AddRabbitMqRelayHub(this IServiceCollection services,
+    public static IServiceCollection AddRabbitMqRelayPulse(this IServiceCollection services,
         IConfiguration configuration,
         RabbitMqRelayHubOptions? options = null)
     {
@@ -40,18 +40,11 @@ public static class IocSetup
 
         return new RabbitMqSettings
         {
-            Uri = PickNonEmpty(config.Uri, options.Settings?.Uri),
-            DefaultExchange = PickNonEmpty(config.DefaultExchange, options.Settings?.DefaultExchange),
-            TypePrefix = PickNonEmpty(config.TypePrefix, options.Settings?.TypePrefix),
-            MessageTypeHeaderName = PickNonEmpty(config.MessageTypeHeaderName, options.Settings?.MessageTypeHeaderName)
+            Uri = config.Uri.TryPickNonEmpty(options.Settings?.Uri).NullToEmpty(),
+            DefaultExchange = config.DefaultExchange.TryPickNonEmpty(options.Settings?.DefaultExchange).NullToEmpty(),
+            TypePrefix = config.TypePrefix.TryPickNonEmpty(options.Settings?.TypePrefix),
+            MessageTypeHeaderName = config.MessageTypeHeaderName.TryPickNonEmpty(options.Settings?.MessageTypeHeaderName)
         };
-    }
-
-    private static string PickNonEmpty(string? value, string? alt)
-    {
-        if (!string.IsNullOrWhiteSpace(value)) return value;
-
-        return alt ?? string.Empty;
     }
 }
 

@@ -19,6 +19,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelayPulse.Core", "src\Rela
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RelayPulse.RabbitMQ", "src\RelayPulse.RabbitMQ\RelayPulse.RabbitMQ.csproj", "{734F04B9-5D4D-4A96-B345-11155A7C75BC}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{D328CE41-DD6D-444C-BD13-B0AB2EDC661C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Samples.PublishExamples", "samples\Samples.PublishExamples\Samples.PublishExamples.csproj", "{3938B6B3-1808-4F4D-B7E9-DC9CBEE82976}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,5 +44,12 @@ Global
 		{734F04B9-5D4D-4A96-B345-11155A7C75BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{734F04B9-5D4D-4A96-B345-11155A7C75BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{734F04B9-5D4D-4A96-B345-11155A7C75BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3938B6B3-1808-4F4D-B7E9-DC9CBEE82976}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3938B6B3-1808-4F4D-B7E9-DC9CBEE82976}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3938B6B3-1808-4F4D-B7E9-DC9CBEE82976}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3938B6B3-1808-4F4D-B7E9-DC9CBEE82976}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{3938B6B3-1808-4F4D-B7E9-DC9CBEE82976} = {D328CE41-DD6D-444C-BD13-B0AB2EDC661C}
 	EndGlobalSection
 EndGlobal

@@ -5,7 +5,7 @@ namespace RelayPulse.RabbitMQ;
 
 internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
 {
-    public IBasicProperties Build<T>(IModel channel, string type, Message<T> msg)
+    public IBasicProperties Build<T>(IModel channel, string type, Message<T> msg, double? expiry)
     {
         var prop = channel.CreateBasicProperties();
 
@@ -13,6 +13,8 @@ internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
 
         prop.Type = string.IsNullOrWhiteSpace(msg.Type) ? type : msg.Type;
 
+        if (expiry.HasValue && expiry > 0) prop.Expiration = $"{expiry}";
+        
         if (!string.IsNullOrWhiteSpace(msg.AppId))
         {
             prop.AppId = msg.AppId;

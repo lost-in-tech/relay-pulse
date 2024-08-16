@@ -5,6 +5,7 @@ public record RabbitMqSettings :
     IMessagePublishSettings,
     IPublisherChannelSettings
 {
+    public string? AppId { get; init; }
     public string Uri { get; init; } = string.Empty;
     public string DefaultExchange { get; init; } = string.Empty;
     
