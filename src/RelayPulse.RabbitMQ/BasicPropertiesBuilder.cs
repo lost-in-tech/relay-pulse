@@ -5,16 +5,13 @@ namespace RelayPulse.RabbitMQ;
 
 internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
 {
-    public IBasicProperties Build<T>(IModel channel, Message<T> msg)
+    public IBasicProperties Build<T>(IModel channel, string type, Message<T> msg)
     {
         var prop = channel.CreateBasicProperties();
 
         prop.ContentEncoding = "utf-8";
 
-        if (!string.IsNullOrWhiteSpace(msg.Type))
-        {
-            prop.Type = msg.Type;
-        }
+        prop.Type = string.IsNullOrWhiteSpace(msg.Type) ? type : msg.Type;
 
         if (!string.IsNullOrWhiteSpace(msg.AppId))
         {

@@ -1,9 +1,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using NSubstitute;
-using NSubstitute.ClearExtensions;
-using RabbitMQ.Client;
 
 namespace RelayPulse.RabbitMQ.Tests.Fakes;
 
@@ -15,11 +12,7 @@ public sealed class IocFixture
         var sc = new ServiceCollection();
         sc.AddRabbitMqRelayHub(config, new RabbitMqRelayHubOptions
         {
-            Settings = new RabbitMqSettings
-            {
-                Uri = "amqps://guest:guest@localhost/rabbit",
-                DefaultExchange = "bookworm.events"
-            }
+            Settings = RabbitMqSettingsBuilder.Build()
         });
         
         setup?.Invoke(sc);

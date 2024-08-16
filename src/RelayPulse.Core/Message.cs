@@ -9,11 +9,7 @@ public record Message<T>
     public string? AppId { get; init; }
     public string? Cid { get; init; }
     public string? UserId { get; init; }
-    
-    /// <summary>
-    /// Optional. default is full name of the type of T
-    /// </summary>
-    public string Type { get; init; } = typeof(T).FullName ?? typeof(T).Name;
+    public string? Type { get; init; }
     
     public required T Content { get; init; }
     public Dictionary<string, string> Headers { get; init; } = new(StringComparer.OrdinalIgnoreCase);

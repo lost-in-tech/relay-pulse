@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using RelayPulse.Core;
 using RelayPulse.RabbitMQ.Tests.Fakes;
 using Shouldly;
@@ -35,6 +36,33 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
             () => gotCallInfo.LastInput!.BasicProperties.MessageId.ShouldBe(Constants.FixedGuidOne.ToString()),
             () => gotCallInfo.Body!.Id.ShouldBe("123")
         );
+    }
+
+    [Fact]
+    public async Task user_prefix_for_type_name_when_provided()
+    {
+        var services = fixture.Services(x =>
+        {
+            x.Replace(ServiceDescriptor.Singleton<IMessagePublishSettings>(RabbitMqSettingsBuilder.Build() with
+            {
+                TypePrefix = "test-"
+            }));
+        });
+
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+
+        var rsp = await sut.Publish(givenMsg);
+        var callInfo =  services.GetRabbitMqPublishCallInfo<OrderCreated>();
+        
+        rsp.ShouldBeTrue();
+        
+        callInfo.LastInput!.BasicProperties.Type.ShouldBe("test-OrderCreated");
+        callInfo.LastInput!.BasicProperties.Headers.ShouldContainKey(RabbitMQ.Constants.HeaderMsgType);
     }
     
     [Fact]
