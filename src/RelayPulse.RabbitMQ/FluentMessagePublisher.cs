@@ -27,10 +27,10 @@ public static class HaveMessageExtensions
     
     
     public static IHaveHeaders Expiry(this IHaveMessage msg, double seconds) 
-        => msg.Header(Constants.HeaderExpiryKey, $"{seconds * 1000}");
+        => msg.Header(Constants.HeaderExpiryKey, $"{seconds}");
 
     public static IHaveHeaders Expiry(this IHaveHeaders msg, double seconds) 
-        => msg.Header(Constants.HeaderExpiryKey, $"{seconds * 1000}");
+        => msg.Header(Constants.HeaderExpiryKey, $"{seconds}");
 
     public static IHaveHeaders Expiry(this IHaveMessage msg, TimeSpan expiry) 
         => msg.Expiry(expiry.TotalSeconds);

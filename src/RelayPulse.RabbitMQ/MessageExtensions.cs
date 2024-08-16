@@ -26,7 +26,7 @@ public static class MessageExtensions
     
     public static void SetExpiry<T>(this Message<T> msg, double seconds)
     {
-        msg.Headers[Constants.HeaderExpiryKey] = $"{seconds * 1000}";
+        msg.Headers[Constants.HeaderExpiryKey] = $"{seconds}";
     }
 
     public static void SetExpiry<T>(this Message<T> msg, TimeSpan expiry) =>

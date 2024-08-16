@@ -39,7 +39,55 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
     }
 
     [Fact]
-    public async Task user_prefix_for_type_name_when_provided()
+    public async Task use_expiry_when_provided()
+    {
+        var services = fixture.Services();
+
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+        
+
+        var rsp = await sut.Message(givenMsg).Expiry(5).Publish();
+        var callInfo =  services.GetRabbitMqPublishCallInfo<OrderCreated>();
+        
+        rsp.ShouldBeTrue();
+        
+        callInfo.LastInput!.BasicProperties.Expiration.ShouldBe("5000");
+    }
+    
+    [Fact]
+    public async Task use_expiry_when_default_expiry_provided()
+    {
+        var services = fixture.Services(x =>
+        {
+            x.Replace(ServiceDescriptor.Singleton<IMessagePublishSettings>(RabbitMqSettingsBuilder.Build() with
+            {
+                DefaultExpiryInSeconds = 10
+            }));
+        });
+
+        var sut = services.GetRequiredService<IMessagePublisher>();
+        
+        var givenMsg = new OrderCreated
+        {
+            Id = "123"
+        };
+        
+
+        var rsp = await sut.Message(givenMsg).Publish();
+        var callInfo =  services.GetRabbitMqPublishCallInfo<OrderCreated>();
+        
+        rsp.ShouldBeTrue();
+        
+        callInfo.LastInput!.BasicProperties.Expiration.ShouldBe("10000");
+    }
+
+    [Fact]
+    public async Task use_prefix_for_type_name_when_provided()
     {
         var services = fixture.Services(x =>
         {

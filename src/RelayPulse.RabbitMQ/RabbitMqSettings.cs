@@ -13,6 +13,8 @@ public record RabbitMqSettings :
     /// Type prefix to use for type name that system gonna pass in header 
     /// </summary>
     public string? TypePrefix { get; init; }
+    
+    public double? DefaultExpiryInSeconds { get; init; }
 
     /// <summary>
     /// name of header used to provide message type. default value is "r-msg-type"

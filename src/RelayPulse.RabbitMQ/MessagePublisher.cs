@@ -52,7 +52,7 @@ internal sealed class MessagePublisher(
             BasicProperties = basicPropertiesBuilder.Build(channel, 
                 fullTypeName, 
                 msg,
-                expiry)
+                expiry ?? settings.DefaultExpiryInSeconds)
         });
 
         return Task.FromResult(true);
@@ -86,6 +86,7 @@ internal sealed class MessagePublisher(
 
 internal interface IMessagePublishSettings
 {
+    public double? DefaultExpiryInSeconds { get; }
     public string? AppId { get; }
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
