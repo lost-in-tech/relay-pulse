@@ -16,14 +16,16 @@ internal sealed class MessagePublisher(
     {
         var type = typeof(T);
         var fullTypeName = type.FullName ?? type.Name;
-        
-        var typeName = $"{msg.AppId.EmptyAlternative("app")}/{settings.TypePrefix}{type.Name}";
 
         foreach (var filter in filters)
         {
             msg = filter.Apply(msg);
         }
-
+        
+        var appName = msg.AppId.TryPickNonEmpty(settings.AppId);
+        
+        var typeName = $"{appName.EmptyAlternative("app")}/{settings.TypePrefix}{type.Name}";
+        
         msg.Headers[settings.MessageTypeHeaderName.EmptyAlternative(Constants.HeaderMsgType)] = typeName.ToSnakeCase();
 
         var exchange = PopValue(msg.Headers, Constants.HeaderExchange) ?? settings.DefaultExchange;
@@ -52,7 +54,8 @@ internal sealed class MessagePublisher(
             BasicProperties = basicPropertiesBuilder.Build(channel, 
                 fullTypeName, 
                 msg,
-                expiry ?? settings.DefaultExpiryInSeconds)
+                expiry ?? settings.DefaultExpiryInSeconds,
+                appName)
         });
 
         return Task.FromResult(true);

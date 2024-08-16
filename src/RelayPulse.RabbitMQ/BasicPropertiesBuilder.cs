@@ -8,7 +8,8 @@ internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
     public IBasicProperties Build<T>(IModel channel, 
         string type, 
         Message<T> msg, 
-        double? expiry)
+        double? expiry,
+        string? appName)
     {
         var prop = channel.CreateBasicProperties();
 
@@ -18,9 +19,9 @@ internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
 
         if (expiry.HasValue && expiry > 0) prop.Expiration = $"{expiry.Value * 1000}";
         
-        if (!string.IsNullOrWhiteSpace(msg.AppId))
+        if (appName.HasValue())
         {
-            prop.AppId = msg.AppId;
+            prop.AppId = appName;
         }
 
         if (!string.IsNullOrWhiteSpace(msg.UserId))
