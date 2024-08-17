@@ -43,7 +43,7 @@ public static class IocSetup
             Uri = config.Uri.TryPickNonEmpty(options.Settings?.Uri).NullToEmpty(),
             DefaultExchange = config.DefaultExchange.TryPickNonEmpty(options.Settings?.DefaultExchange).NullToEmpty(),
             TypePrefix = config.TypePrefix.TryPickNonEmpty(options.Settings?.TypePrefix),
-            MessageTypeHeaderName = config.MessageTypeHeaderName.TryPickNonEmpty(options.Settings?.MessageTypeHeaderName)
+            MessageTypeFullHeaderName = config.MessageTypeFullHeaderName.TryPickNonEmpty(options.Settings?.MessageTypeFullHeaderName)
         };
     }
 }

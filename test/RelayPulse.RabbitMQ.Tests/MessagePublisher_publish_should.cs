@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using NSubstitute;
 using RelayPulse.Core;
 using RelayPulse.RabbitMQ.Tests.Fakes;
+using RelayPulse.RabbitMQ.Tests.Helpers;
 using Shouldly;
 
 namespace RelayPulse.RabbitMQ.Tests;
@@ -13,14 +15,14 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
     {
         // Arrange
         var services = fixture.Services();
-        
+
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
+
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
-        
+
         // Act
         var rsp = await sut.Publish(givenMsg);
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
@@ -44,21 +46,21 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         var services = fixture.Services();
 
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
+
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
-        
+
 
         var rsp = await sut.Message(givenMsg).Expiry(5).Publish();
-        var callInfo =  services.GetRabbitMqPublishCallInfo<OrderCreated>();
-        
+        var callInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+
         rsp.ShouldBeTrue();
-        
+
         callInfo.LastInput!.BasicProperties.Expiration.ShouldBe("5000");
     }
-    
+
     [Fact]
     public async Task use_expiry_when_default_expiry_provided()
     {
@@ -71,18 +73,18 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         });
 
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
+
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
-        
+
 
         var rsp = await sut.Message(givenMsg).Publish();
-        var callInfo =  services.GetRabbitMqPublishCallInfo<OrderCreated>();
-        
+        var callInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+
         rsp.ShouldBeTrue();
-        
+
         callInfo.LastInput!.BasicProperties.Expiration.ShouldBe("10000");
     }
 
@@ -98,59 +100,59 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         });
 
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
+
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
 
         var rsp = await sut.Publish(givenMsg);
-        var callInfo =  services.GetRabbitMqPublishCallInfo<OrderCreated>();
-        
+        var callInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+
         rsp.ShouldBeTrue();
-        
+
         callInfo.LastInput!.BasicProperties.Type.ShouldBe(typeof(OrderCreated).FullName ?? nameof(OrderCreated));
-        callInfo.LastInput!.BasicProperties.Headers.ShouldContainKey(RabbitMQ.Constants.HeaderMsgType);
+        callInfo.LastInput!.BasicProperties.Headers.ShouldContainKey(RabbitMQ.Constants.HeaderMsgTypeFull);
     }
-    
+
     [Fact]
     public async Task use_exchange_that_provided_in_input()
     {
         var services = fixture.Services();
-        
+
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
-        
+
+
         var givenExchange = "test-exchange";
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
-        
+
         var rsp = await sut.Message(givenMsg)
-                            .Exchange(givenExchange)
-                            .Publish();
+            .Exchange(givenExchange)
+            .Publish();
 
         rsp.ShouldBeTrue();
 
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
-        
+
         gotCallInfo.LastInput!.Exchange.ShouldBe(givenExchange);
     }
-    
+
     [Fact]
     public async Task use_routing_key_that_provided_in_input()
     {
         var services = fixture.Services();
-        
+
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
+
         var giveRoutingKey = "test-route-key";
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
-        
+
         var rsp = await sut.Message(givenMsg)
             .Routing(giveRoutingKey)
             .Publish();
@@ -158,48 +160,22 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         rsp.ShouldBeTrue();
 
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
-        
+
         gotCallInfo.LastInput!.RoutingKey.ShouldBe(giveRoutingKey);
     }
-    
+
     [Fact]
     public async Task use_message_id_that_provided_in_input()
     {
         var services = fixture.Services();
-        
+
         var sut = services.GetRequiredService<IMessagePublisher>();
-        
+
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
-        
-        var rsp = await sut
-                    .Message(Constants.FixedGuidTwo, givenMsg)
-                    .Publish();
 
-        rsp.ShouldBeTrue();
-
-        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
-        
-        gotCallInfo.LastInput!.BasicProperties.MessageId.ShouldBe(Constants.FixedGuidTwo.ToString());
-    }
-    
-    [Fact]
-    public async Task use_value_provided_by_filter()
-    {
-        var services = fixture.Services(sc =>
-        {
-            sc.AddTransient<IMessageFilter, SampleFilter>();
-        });
-        
-        var sut = services.GetRequiredService<IMessagePublisher>();
-        
-        var givenMsg = new OrderCreated
-        {
-            Id = "123"
-        };
-        
         var rsp = await sut
             .Message(Constants.FixedGuidTwo, givenMsg)
             .Publish();
@@ -208,29 +184,68 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
 
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
-        var basicProperties = gotCallInfo.LastInput!.BasicProperties;
-        
-        basicProperties.ShouldSatisfyAllConditions(
-            () => basicProperties.UserId.ShouldBe("user-1"),
-            () => basicProperties.AppId.ShouldBe("app-id"),
-            () => basicProperties.Type.ShouldBe($"bookworm.{nameof(OrderCreated).ToLowerInvariant()}"),
-            () => basicProperties.CorrelationId.ShouldBe("cid")
-        );
+        gotCallInfo.LastInput!.BasicProperties.MessageId.ShouldBe(Constants.FixedGuidTwo.ToString());
     }
-    
-    
-    public class SampleFilter : IMessageFilter
+
+    [Fact]
+    public async Task use_value_provided_by_filter()
     {
-        public Message<T> Apply<T>(Message<T> msg)
+        var givenMsg = new Message<OrderCreated>
         {
-            return msg with
+            Content = new OrderCreated { Id = "123" }
+        };
+        
+        var givenFilter = Substitute.For<IMessageFilter>();
+        var givenFilterMsg = givenMsg with
+        {
+            Id = new Guid("D1438A72-DAB3-41B8-B3DD-1F5ABD7713E3"),
+            Cid = "CidFiltered",
+            Type = "TypeFiltered",
+            AppId = "AppIdFiltered",
+            UserId = "UserIdFiltered",
+            Tenant = "TenantFiltered"
+        };
+        givenFilterMsg.Headers["item-filter"] = "itemFilterValue";
+        
+        givenFilter.Apply(givenMsg).Returns(givenFilterMsg);
+        
+        var gotBasicInput = await Execute(
+            givenMsg: givenMsg,
+            settings: null,
+            filters: [givenFilter]);
+
+        gotBasicInput.ShouldNotBeNull();
+        gotBasicInput.BasicProperties.ShouldMatchContent();
+    }
+
+    private async Task<BasicPublishInput?> Execute<T>(
+        Message<T> givenMsg,
+        RabbitMqSettings? settings = null,
+        IEnumerable<IMessageFilter>? filters = null)
+    {
+        var services = fixture.Services(sc =>
+        {
+            if (settings != null)
             {
-                AppId = "app-id",
-                Cid = "cid",
-                Type = $"bookworm.{typeof(T).Name.ToLowerInvariant()}",
-                UserId = "user-1"
-            };
-        }
+                sc.Replace(ServiceDescriptor.Singleton<IMessagePublishSettings>(settings));
+            }
+
+            if (filters != null)
+            {
+                foreach (var messageFilter in filters)
+                {
+                    sc.AddTransient<IMessageFilter>(_ => messageFilter);
+                }
+            }
+        });
+
+        var sut = services.GetRequiredService<IMessagePublisher>();
+
+        _ = await sut.Publish(givenMsg);
+
+        var gotCallInfo = services.GetRabbitMqPublishCallInfo<T>();
+
+        return gotCallInfo.LastInput;
     }
 
     public record OrderCreated

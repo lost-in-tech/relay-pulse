@@ -14,51 +14,59 @@ internal sealed class MessagePublisher(
 {
     public Task<bool> Publish<T>(Message<T> msg, CancellationToken ct)
     {
+        foreach (var filter in filters)
+        {
+            msg = filter.Apply(msg);
+        }
+        
         var type = typeof(T);
-        var fullTypeName = type.FullName ?? type.Name;
+        var typeFullName = msg.Type.EmptyAlternative(type.FullName.EmptyAlternative(type.Name));
+        var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(type.Name.ToSnakeCase())}";
+        var typePath = new[] { $"{msg.AppId.EmptyAlternative("app")}", msg.Tenant, typeName}.Join("/");
 
+        
         var tenant = msg.Tenant.TryPickNonEmpty(settings.DefaultTenant);
         if (tenant.HasValue())
         {
             msg.Headers[Constants.HeaderTenant] = tenant;
         }
         
-        foreach (var filter in filters)
-        {
-            msg = filter.Apply(msg);
-        }
-        
         var appName = msg.AppId.TryPickNonEmpty(settings.AppId);
-        
-        var typeName = $"{appName.EmptyAlternative("app")}/{settings.TypePrefix}{type.Name}";
-        
-        msg.Headers[settings.MessageTypeHeaderName.EmptyAlternative(Constants.HeaderMsgType)] = typeName.ToSnakeCase();
 
-        var exchange = PopValue(msg.Headers, Constants.HeaderExchange) ?? settings.DefaultExchange;
+        if (appName.HasValue())
+        {
+            msg.Headers[Constants.HeaderAppId] = appName;
+        }
+
+        msg.Headers[settings.MessageTypeShortHeaderName.EmptyAlternative(Constants.HeaderMsgTypeShort)] = typeName;
+        
+        msg.Headers[settings.MessageTypeFullHeaderName.EmptyAlternative(Constants.HeaderMsgTypeFull)] = typePath;
+
+        var exchange = msg.Headers.PopValue(Constants.HeaderExchange).EmptyAlternative(settings.DefaultExchange);
 
         if (string.IsNullOrWhiteSpace(exchange))
         {
             throw new Exception("Exchange name cannot be empty. Make sure you provide exchange name.");
         }
 
-        var channelFactory = channelFactories.FirstOrDefault(x => x.IsApplicable(fullTypeName, forPublisher: true));
+        var channelFactory = channelFactories.FirstOrDefault(x => x.IsApplicable(typeFullName, forPublisher: true));
 
         if (channelFactory == null)
         {
-            throw new Exception($"No applicable channel factory available for publisher and {fullTypeName}");
+            throw new Exception($"No applicable channel factory available for publisher and {typeFullName}");
         }
         
-        var channel = channelFactory.GetOrCreate(typeName);
+        var channel = channelFactory.GetOrCreate(type.AssemblyQualifiedName.EmptyAlternative(typeFullName));
 
-        var expiry = PopValueAsDouble(msg.Headers, Constants.HeaderExpiryKey);
+        var expiry = msg.Headers.PopAsDouble(Constants.HeaderExpiryKey);
         
         rabbitMqWrapper.BasicPublish(channel, new BasicPublishInput
         {
             Body = Encoding.UTF8.GetBytes(serializer.Serialize(msg.Content)),
             Exchange = exchange,
-            RoutingKey = PopValue(msg.Headers, Constants.HeaderRoutingKey) ?? string.Empty,
+            RoutingKey = msg.Headers.PopValue(Constants.HeaderRoutingKey) ?? string.Empty,
             BasicProperties = basicPropertiesBuilder.Build(channel, 
-                fullTypeName, 
+                typeFullName, 
                 msg,
                 expiry ?? settings.DefaultExpiryInSeconds,
                 appName)
@@ -67,29 +75,12 @@ internal sealed class MessagePublisher(
         return Task.FromResult(true);
     }
 
-    
-
     public Task<bool> Publish<T>(T content, CancellationToken ct)
     {
         return Publish(new Message<T>
         {
             Content = content
         }, ct);
-    }
-
-    private string? PopValue(Dictionary<string, string>? headers, string key)
-    {
-        if (headers == null) return null;
-        var result = headers.GetValueOrDefault(key);
-        if (result != null) headers.Remove(key);
-        return result;
-    }
-    
-    private double? PopValueAsDouble(Dictionary<string, string>? headers, string key)
-    {
-        var result = PopValue(headers, key);
-        if (result.HasValue()) return double.TryParse(result, out var longValue) ? longValue : null;
-        return null;
     }
 }
 
@@ -100,5 +91,6 @@ internal interface IMessagePublishSettings
     public string? AppId { get; }
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
-    public string? MessageTypeHeaderName { get; }
+    public string? MessageTypeFullHeaderName { get; }
+    public string? MessageTypeShortHeaderName { get; }
 }

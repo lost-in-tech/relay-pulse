@@ -21,7 +21,9 @@ public record RabbitMqSettings :
     /// <summary>
     /// name of header used to provide message type. default value is "r-msg-type"
     /// </summary>
-    public string? MessageTypeHeaderName { get; init; }
+    public string? MessageTypeFullHeaderName { get; init; }
+    
+    public string? MessageTypeShortHeaderName { get; init; }
     
     /// <summary>
     /// Optional and default is false. When set to true for each message type a new channel will be used
