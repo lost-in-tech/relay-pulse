@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Text;
+using RabbitMQ.Client;
 using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ;
@@ -8,7 +10,9 @@ internal sealed class MessagePublisher(
     IMessagePublishSettings settings,
     IEnumerable<IChannelFactory> channelFactories,
     IMessageSerializer serializer,
-    BasicPropertiesBuilder basicPropertiesBuilder,
+    IUniqueId uniqueId,
+    //BasicPropertiesBuilder basicPropertiesBuilder,
+    BasicPropertiesBuilder basicPropertiesBuilder,  
     IEnumerable<IMessageFilter> filters)
     : IMessagePublisher
 {
@@ -18,30 +22,11 @@ internal sealed class MessagePublisher(
         {
             msg = filter.Apply(msg);
         }
-        
+
         var type = typeof(T);
-        var typeFullName = msg.Type.EmptyAlternative(type.FullName.EmptyAlternative(type.Name));
-        var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(type.Name.ToSnakeCase())}";
-        var typePath = new[] { $"{msg.AppId.EmptyAlternative("app")}", msg.Tenant, typeName}.Join("/");
 
+        var typeName = msg.Type.EmptyAlternative(type.FullName.EmptyAlternative(type.Name));
         
-        var tenant = msg.Tenant.TryPickNonEmpty(settings.DefaultTenant);
-        if (tenant.HasValue())
-        {
-            msg.Headers[Constants.HeaderTenant] = tenant;
-        }
-        
-        var appName = msg.AppId.TryPickNonEmpty(settings.AppId);
-
-        if (appName.HasValue())
-        {
-            msg.Headers[Constants.HeaderAppId] = appName;
-        }
-
-        msg.Headers[settings.MessageTypeShortHeaderName.EmptyAlternative(Constants.HeaderMsgTypeShort)] = typeName;
-        
-        msg.Headers[settings.MessageTypeFullHeaderName.EmptyAlternative(Constants.HeaderMsgTypeFull)] = typePath;
-
         var exchange = msg.Headers.PopValue(Constants.HeaderExchange).EmptyAlternative(settings.DefaultExchange);
 
         if (string.IsNullOrWhiteSpace(exchange))
@@ -49,27 +34,17 @@ internal sealed class MessagePublisher(
             throw new Exception("Exchange name cannot be empty. Make sure you provide exchange name.");
         }
 
-        var channelFactory = channelFactories.FirstOrDefault(x => x.IsApplicable(typeFullName, forPublisher: true));
+        var channel = GetChannel(typeName, type);
 
-        if (channelFactory == null)
-        {
-            throw new Exception($"No applicable channel factory available for publisher and {typeFullName}");
-        }
-        
-        var channel = channelFactory.GetOrCreate(type.AssemblyQualifiedName.EmptyAlternative(typeFullName));
-
-        var expiry = msg.Headers.PopAsDouble(Constants.HeaderExpiryKey);
+        var id = msg.Id ?? uniqueId.New();
+        var props = basicPropertiesBuilder.Build(id, channel, msg);
         
         rabbitMqWrapper.BasicPublish(channel, new BasicPublishInput
         {
             Body = Encoding.UTF8.GetBytes(serializer.Serialize(msg.Content)),
             Exchange = exchange,
             RoutingKey = msg.Headers.PopValue(Constants.HeaderRoutingKey) ?? string.Empty,
-            BasicProperties = basicPropertiesBuilder.Build(channel, 
-                typeFullName, 
-                msg,
-                expiry ?? settings.DefaultExpiryInSeconds,
-                appName)
+            BasicProperties = props
         });
 
         return Task.FromResult(true);
@@ -81,6 +56,19 @@ internal sealed class MessagePublisher(
         {
             Content = content
         }, ct);
+    }
+
+    private IModel GetChannel(string typeName, Type type)
+    {
+        var channelFactory = channelFactories.FirstOrDefault(x => x.IsApplicable(typeName, forPublisher: true));
+
+        if (channelFactory == null)
+        {
+            throw new Exception($"No applicable channel factory available for publisher and {typeName}");
+        }
+        
+        var channel = channelFactory.GetOrCreate(type.AssemblyQualifiedName.EmptyAlternative(typeName));
+        return channel;
     }
 }
 

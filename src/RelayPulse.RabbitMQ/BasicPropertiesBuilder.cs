@@ -3,50 +3,65 @@ using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ;
 
-internal sealed class BasicPropertiesBuilder(IUniqueId uniqueId)
+internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings)
 {
-    public IBasicProperties Build<T>(IModel channel, 
-        string type, 
-        Message<T> msg, 
-        double? expiry,
-        string? appName)
+    public IBasicProperties Build<T>(Guid id, IModel channel, Message<T> msg)
     {
         var prop = channel.CreateBasicProperties();
+        prop.Headers = new Dictionary<string, object>();
 
-        prop.ContentEncoding = "utf-8";
-        prop.ContentType = "application/json";
-
-        prop.Type = string.IsNullOrWhiteSpace(msg.Type) ? type : msg.Type;
-
-        if (expiry.HasValue && expiry > 0) prop.Expiration = $"{expiry.Value * 1000}";
+        var msgHeaders = msg.Headers;
         
+        var appName = msg.AppId.TryPickNonEmpty(settings.AppId);
+
         if (appName.HasValue())
         {
             prop.AppId = appName;
+            prop.Headers[Constants.HeaderAppId] = appName;
         }
-
-        if (!string.IsNullOrWhiteSpace(msg.UserId))
+        
+        var expiryValue = msgHeaders.PopAsDouble(Constants.HeaderExpiryKey) ?? settings.DefaultExpiryInSeconds;
+        if (expiryValue is > 0)
         {
-            prop.UserId = msg.UserId;
+            prop.Expiration = (expiryValue.Value * 1000).ToString("F0");
+        }
+        
+        var tenant = msg.Tenant.TryPickNonEmpty(settings.DefaultTenant);
+        if (tenant.HasValue())
+        {
+            prop.Headers[Constants.HeaderTenant] = tenant;
         }
 
-        if (!string.IsNullOrWhiteSpace(msg.Cid))
+        var type = typeof(T);
+        var typeFullName = msg.Type.EmptyAlternative(type.FullName.EmptyAlternative(type.Name));
+        prop.Type = typeFullName;
+
+        var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(type.Name.ToSnakeCase())}";
+        var typePath = new[] { $"{msg.AppId.EmptyAlternative("app")}", msg.Tenant, typeName}.Join("/");
+        prop.Headers[settings.MessageTypeFullHeaderName.EmptyAlternative(Constants.HeaderMsgTypeFull)] = typePath;
+        prop.Headers[settings.MessageTypeShortHeaderName.EmptyAlternative(Constants.HeaderMsgTypeShort)] = typeName;
+
+
+        if (msg.Cid.HasValue())
         {
             prop.CorrelationId = msg.Cid;
         }
 
-        prop.MessageId = (msg.Id ?? uniqueId.New()).ToString();
+        prop.ContentEncoding = "utf-8";
+        prop.ContentType = "application/json";
 
-        if (msg.Headers.Count > 0)
+        prop.MessageId = id.ToString();
+        if (msg.UserId.HasValue())
         {
-            prop.Headers ??= new Dictionary<string, object>();
+            prop.UserId = msg.UserId;
+        }
 
-            foreach (var header in msg.Headers)
-            {
-                prop.Headers[header.Key] = header.Value;
-            }
+        foreach (var header in msgHeaders)
+        {
+            prop.Headers[header.Key] = header.Value;
         }
 
         return prop;
     }
+
 }

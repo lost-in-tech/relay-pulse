@@ -5,11 +5,11 @@
   "correlationId": "CidFiltered",
   "deliveryMode": 0,
   "headers": {
-    "item-filter": "itemFilterValue",
-    "rp-tenant": "TenantFiltered",
     "rp-appid": "AppIdFiltered",
+    "rp-tenant": "TenantFiltered",
+    "rp-msg-type-full": "AppIdFiltered/TenantFiltered/TypeFiltered",
     "rp-msg-type": "TypeFiltered",
-    "rp-msg-type-full": "AppIdFiltered/TenantFiltered/TypeFiltered"
+    "item-filter": "itemFilterValue"
   },
   "messageId": "d1438a72-dab3-41b8-b3dd-1f5abd7713e3",
   "persistent": false,
