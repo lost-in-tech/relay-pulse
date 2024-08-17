@@ -38,12 +38,7 @@ public static class IocSetup
         var config = new RabbitMqSettings();
         configuration.GetSection(options.ConfigSectionName).Bind(config);
 
-        return new RabbitMqSettings
-        {
-            Uri = config.Uri.TryPickNonEmpty(options.Settings?.Uri).NullToEmpty(),
-            DefaultExchange = config.DefaultExchange.TryPickNonEmpty(options.Settings?.DefaultExchange).NullToEmpty(),
-            TypePrefix = config.TypePrefix.TryPickNonEmpty(options.Settings?.TypePrefix)
-        };
+        return SettingsMerger.Read(options.Settings, config);
     }
 }
 
