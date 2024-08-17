@@ -192,6 +192,7 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
     {
         var givenMsg = new Message<OrderCreated>
         {
+            Cid = "MyCidThatShouldOverride",
             Content = new OrderCreated { Id = "123" }
         };
         
