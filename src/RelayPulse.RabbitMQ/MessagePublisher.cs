@@ -1,5 +1,4 @@
-﻿using System.Globalization;
-using System.Text;
+﻿using System.Text;
 using RabbitMQ.Client;
 using RelayPulse.Core;
 
@@ -11,7 +10,6 @@ internal sealed class MessagePublisher(
     IEnumerable<IChannelFactory> channelFactories,
     IMessageSerializer serializer,
     IUniqueId uniqueId,
-    //BasicPropertiesBuilder basicPropertiesBuilder,
     BasicPropertiesBuilder basicPropertiesBuilder,  
     IEnumerable<IMessageFilter> filters)
     : IMessagePublisher
@@ -83,4 +81,6 @@ internal interface IMessagePublishSettings
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
     public string? MessageTypeHeaderName { get; }
+    public string? TenantHeaderName { get; }
+    public string? AppIdHeaderName { get; }
 }

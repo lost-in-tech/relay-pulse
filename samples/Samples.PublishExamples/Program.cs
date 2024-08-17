@@ -26,10 +26,31 @@ await publisher.Message(new OrderCreated
     Id = "order-123"
 }).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
 
+await publisher.Message(new OrderCancelled
+{
+    Id = "order-124"
+}).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
+
+await publisher.Message(new OrderLost
+{
+    Id = "order-124"
+}).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
 
 Console.WriteLine("Hello, World!");
 
 public record OrderCreated
+{
+    public required string Id { get; init; }
+}
+
+public record OrderCancelled
+{
+    public required string Id { get; init; }
+}
+
+
+
+public record OrderLost
 {
     public required string Id { get; init; }
 }

@@ -17,7 +17,7 @@ internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings)
         if (appName.HasValue())
         {
             prop.AppId = appName;
-            prop.Headers[Constants.HeaderAppId] = appName;
+            prop.Headers[settings.AppIdHeaderName.EmptyAlternative(Constants.HeaderAppId)] = appName;
         }
         
         var expiryValue = msgHeaders.PopAsDouble(Constants.HeaderExpiryKey) ?? settings.DefaultExpiryInSeconds;
@@ -29,7 +29,7 @@ internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings)
         var tenant = msg.Tenant.TryPickNonEmpty(settings.DefaultTenant);
         if (tenant.HasValue())
         {
-            prop.Headers[Constants.HeaderTenant] = tenant;
+            prop.Headers[settings.TenantHeaderName.EmptyAlternative(Constants.HeaderTenant)] = tenant;
         }
 
         var type = typeof(T);

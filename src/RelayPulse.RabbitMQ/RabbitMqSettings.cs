@@ -20,6 +20,10 @@ public record RabbitMqSettings :
     
     public string? MessageTypeHeaderName { get; init; }
     
+    public string? TenantHeaderName { get; init; }
+    
+    public string? AppIdHeaderName { get; init; }
+
     /// <summary>
     /// Optional and default is false. When set to true for each message type a new channel will be used
     /// </summary>
