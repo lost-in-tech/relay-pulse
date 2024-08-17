@@ -17,13 +17,8 @@ public record RabbitMqSettings :
     public string? TypePrefix { get; init; }
     
     public double? DefaultExpiryInSeconds { get; init; }
-
-    /// <summary>
-    /// name of header used to provide message type. default value is "r-msg-type"
-    /// </summary>
-    public string? MessageTypeFullHeaderName { get; init; }
     
-    public string? MessageTypeShortHeaderName { get; init; }
+    public string? MessageTypeHeaderName { get; init; }
     
     /// <summary>
     /// Optional and default is false. When set to true for each message type a new channel will be used

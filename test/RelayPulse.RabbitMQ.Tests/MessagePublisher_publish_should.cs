@@ -13,31 +13,17 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
     [Fact]
     public async Task send_correct_payload_to_rabbit_mq_when_only_event_payload_provided()
     {
-        // Arrange
-        var services = fixture.Services();
-
-        var sut = services.GetRequiredService<IMessagePublisher>();
-
         var givenMsg = new OrderCreated
         {
             Id = "123"
         };
 
-        // Act
-        var rsp = await sut.Publish(givenMsg);
-        var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
+        var rsp = await Execute(new Message<OrderCreated>
+        {
+            Content = givenMsg
+        });
 
-        // Assert
-        rsp.ShouldBeTrue();
-
-        gotCallInfo.ShouldSatisfyAllConditions
-        (
-            () => gotCallInfo.ExecutionCount.ShouldBe(1),
-            () => gotCallInfo.LastInput!.Exchange.ShouldBe("bookworm.events"),
-            () => gotCallInfo.LastInput!.BasicProperties.Type.ShouldBe(typeof(OrderCreated).FullName),
-            () => gotCallInfo.LastInput!.BasicProperties.MessageId.ShouldBe(Constants.FixedGuidOne.ToString()),
-            () => gotCallInfo.Body!.Id.ShouldBe("123")
-        );
+        rsp.ShouldMatchContent();
     }
 
     [Fact]
@@ -56,7 +42,7 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         var rsp = await sut.Message(givenMsg).Expiry(5).Publish();
         var callInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
-        rsp.ShouldBeTrue();
+        rsp.Id.ShouldBe(Constants.FixedGuidOne);
 
         callInfo.LastInput!.BasicProperties.Expiration.ShouldBe("5000");
     }
@@ -83,7 +69,6 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         var rsp = await sut.Message(givenMsg).Publish();
         var callInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
-        rsp.ShouldBeTrue();
 
         callInfo.LastInput!.BasicProperties.Expiration.ShouldBe("10000");
     }
@@ -109,10 +94,8 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
         var rsp = await sut.Publish(givenMsg);
         var callInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
-        rsp.ShouldBeTrue();
 
         callInfo.LastInput!.BasicProperties.Type.ShouldBe(typeof(OrderCreated).FullName ?? nameof(OrderCreated));
-        callInfo.LastInput!.BasicProperties.Headers.ShouldContainKey(RabbitMQ.Constants.HeaderMsgTypeFull);
     }
 
     [Fact]
@@ -133,7 +116,6 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
             .Exchange(givenExchange)
             .Publish();
 
-        rsp.ShouldBeTrue();
 
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
@@ -157,7 +139,6 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
             .Routing(giveRoutingKey)
             .Publish();
 
-        rsp.ShouldBeTrue();
 
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 
@@ -180,7 +161,6 @@ public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture
             .Message(Constants.FixedGuidTwo, givenMsg)
             .Publish();
 
-        rsp.ShouldBeTrue();
 
         var gotCallInfo = services.GetRabbitMqPublishCallInfo<OrderCreated>();
 

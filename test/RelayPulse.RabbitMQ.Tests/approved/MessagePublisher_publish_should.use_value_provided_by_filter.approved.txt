@@ -7,7 +7,6 @@
   "headers": {
     "rp-appid": "AppIdFiltered",
     "rp-tenant": "TenantFiltered",
-    "rp-msg-type-full": "AppIdFiltered/TenantFiltered/TypeFiltered",
     "rp-msg-type": "TypeFiltered",
     "item-filter": "itemFilterValue"
   },

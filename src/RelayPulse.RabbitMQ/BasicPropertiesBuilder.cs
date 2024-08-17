@@ -37,9 +37,7 @@ internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings)
         prop.Type = typeFullName;
 
         var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(type.Name.ToSnakeCase())}";
-        var typePath = new[] { $"{msg.AppId.EmptyAlternative("app")}", msg.Tenant, typeName}.Join("/");
-        prop.Headers[settings.MessageTypeFullHeaderName.EmptyAlternative(Constants.HeaderMsgTypeFull)] = typePath;
-        prop.Headers[settings.MessageTypeShortHeaderName.EmptyAlternative(Constants.HeaderMsgTypeShort)] = typeName;
+        prop.Headers[settings.MessageTypeHeaderName.EmptyAlternative(Constants.HeaderMsgType)] = typeName;
 
 
         if (msg.Cid.HasValue())

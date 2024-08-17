@@ -16,7 +16,7 @@ internal sealed class MessagePublisher(
     IEnumerable<IMessageFilter> filters)
     : IMessagePublisher
 {
-    public Task<bool> Publish<T>(Message<T> msg, CancellationToken ct)
+    public Task<MessagePublishResponse> Publish<T>(Message<T> msg, CancellationToken ct)
     {
         foreach (var filter in filters)
         {
@@ -47,10 +47,13 @@ internal sealed class MessagePublisher(
             BasicProperties = props
         });
 
-        return Task.FromResult(true);
+        return Task.FromResult(new MessagePublishResponse
+        {
+            Id = id
+        });
     }
 
-    public Task<bool> Publish<T>(T content, CancellationToken ct)
+    public Task<MessagePublishResponse> Publish<T>(T content, CancellationToken ct)
     {
         return Publish(new Message<T>
         {
@@ -79,6 +82,5 @@ internal interface IMessagePublishSettings
     public string? AppId { get; }
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
-    public string? MessageTypeFullHeaderName { get; }
-    public string? MessageTypeShortHeaderName { get; }
+    public string? MessageTypeHeaderName { get; }
 }

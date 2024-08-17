@@ -87,7 +87,7 @@ public interface IHaveCid : IPublishMessage
 
 public interface IPublishMessage
 {
-    Task<bool> Publish(CancellationToken ct = default);
+    Task<MessagePublishResponse> Publish(CancellationToken ct = default);
 }
 
 internal class FluentMessagePublisher<T>(IMessagePublisher publisher, T msg, Guid? id) :
@@ -106,7 +106,7 @@ internal class FluentMessagePublisher<T>(IMessagePublisher publisher, T msg, Gui
     private string? _tenant;
     private Dictionary<string, string> _headers = new();
 
-    public Task<bool> Publish(CancellationToken ct = default)
+    public Task<MessagePublishResponse> Publish(CancellationToken ct = default)
     {
         return publisher.Publish(new Message<T>
         {
