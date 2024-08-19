@@ -9,4 +9,16 @@ internal static class Constants
     public const string HeaderMsgType = "rp-msg-type";
     public const string HeaderTenant = "rp-tenant";
     public const string HeaderAppId = "rp-appid";
+    
+    public const string HeaderDeadLetterExchange = "x-dead-letter-exchange";
+    public const string HeaderTimeToLive = "x-message-ttl";
+
+    public const string ExchangeTypeHeader = "headers";
+    public const string ExchangeTypeFanout = "fanout";
+    public const string ExchangeTypeDirect = "direct";
+    public const string ExchangeTypeTopic = "topic";
+    public const string HeaderTargetQueue = "rp-target-queue";
+    
+    public const string HeaderMatch = "x-match";
+    public static string RouteKeyTargetQueue(string queue) => $"rp:target:{queue}";
 }

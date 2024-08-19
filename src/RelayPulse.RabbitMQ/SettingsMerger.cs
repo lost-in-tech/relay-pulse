@@ -10,6 +10,7 @@ internal static class SettingsMerger
         {
             Uri = configSettings.Uri.TryPickNonEmpty(settings.Uri).NullToEmpty(),
             DefaultExchange = configSettings.DefaultExchange.TryPickNonEmpty(settings.DefaultExchange).NullToEmpty(),
+            DefaultExchangeType = configSettings.DefaultExchangeType.TryPickNonEmpty(settings.DefaultExchangeType),
             TypePrefix = configSettings.TypePrefix.TryPickNonEmpty(settings.TypePrefix),
             AppId = configSettings.AppId.TryPickNonEmpty(settings.AppId),
             DefaultTenant = configSettings.DefaultTenant.TryPickNonEmpty(settings.DefaultTenant),
@@ -18,6 +19,7 @@ internal static class SettingsMerger
             MessageTypeHeaderName =  configSettings.MessageTypeHeaderName.TryPickNonEmpty(settings.MessageTypeHeaderName),
             DefaultExpiryInSeconds = configSettings.DefaultExpiryInSeconds ?? settings.DefaultExpiryInSeconds,
             UseChannelPerType = configSettings.UseChannelPerType ?? settings.UseChannelPerType,
+            Queues = configSettings.Queues ?? settings.Queues
         };
     }
 }

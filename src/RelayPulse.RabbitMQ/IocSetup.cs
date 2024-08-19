@@ -18,6 +18,7 @@ public static class IocSetup
         services.TryAddSingleton<IRabbitMqConnectionSettings>(settings);
         services.TryAddSingleton<IMessagePublishSettings>(settings);
         services.TryAddSingleton<IPublisherChannelSettings>(settings);
+        services.TryAddSingleton<IQueueSettings>(settings);
         
         services.TryAddSingleton<BasicPropertiesBuilder>();
         services.TryAddSingleton<IUniqueId, UniqueId>();
@@ -29,6 +30,11 @@ public static class IocSetup
         
         services.TryAddSingleton<IRabbitMqWrapper, RabbitMqWrapper>();
         services.TryAddSingleton<IMessageSerializer,MessageSerializer>();
+        
+        // Subscribers
+        services.TryAddSingleton<QueueSettingsValidator>();
+        services.TryAddSingleton<SetupRabbitMq>();
+        services.TryAddSingleton<IMessageListener, MessageListener>();
 
         return services;
     }

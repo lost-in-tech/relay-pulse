@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RelayPulse.Core;
 using RelayPulse.RabbitMQ;
+using Samples.PublishExamples;
 
 var config = new ConfigurationBuilder().Build();
     
@@ -13,11 +14,24 @@ sc.AddRabbitMqRelayPulse(config, new RabbitMqRelayHubOptions
     Settings = new RabbitMqSettings
     {
         Uri = "amqp://guest:guest@localhost:5672/",
-        DefaultExchange = "bookworm-events"
+        DefaultExchange = "bookworm-events",
+        DefaultExchangeType = "direct",
+        Queues =
+        [
+            new QueueSettings
+            {
+                Name = "email-on-order-completed"
+            }
+        ]
     }
 });
+sc.AddHostedService<Worker>();
 
 var sp = sc.BuildServiceProvider();
+//
+// var msgListener = sp.GetRequiredService<IMessageListener>();
+//
+// await msgListener.Listen(CancellationToken.None);
 
 var publisher = sp.GetRequiredService<IMessagePublisher>();
 
