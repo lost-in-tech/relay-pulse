@@ -7,7 +7,7 @@ namespace RelayPulse.RabbitMQ;
 public interface IMessageSerializer
 {
     string Serialize<T>(T value);
-    T Deserialize<T>(string value);
+    T Deserialize<T>(Stream value);
 }
 
 internal sealed class MessageSerializer : IMessageSerializer
@@ -27,7 +27,7 @@ internal sealed class MessageSerializer : IMessageSerializer
         return JsonSerializer.Serialize(value, _options);
     }
 
-    public T Deserialize<T>(string value)
+    public T Deserialize<T>(Stream value)
     {
         return JsonSerializer.Deserialize<T>(value, _options)!;
     }
