@@ -1,9 +1,9 @@
 using RabbitMQ.Client;
 using RelayPulse.Core;
 
-namespace RelayPulse.RabbitMQ;
+namespace RelayPulse.RabbitMQ.Publishers;
 
-internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings)
+internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings, IClockWrap clockWrap)
 {
     public IBasicProperties Build<T>(Guid id, IModel channel, Message<T> msg)
     {
@@ -39,6 +39,7 @@ internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings)
         var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(type.Name.ToSnakeCase())}";
         prop.Headers[settings.MessageTypeHeaderName.EmptyAlternative(Constants.HeaderMsgType)] = typeName;
 
+        prop.Headers[settings.SentAtHeaderName.EmptyAlternative(Constants.HeaderSentAt)] = clockWrap.UtcNow.ToString("o");
 
         if (msg.Cid.HasValue())
         {

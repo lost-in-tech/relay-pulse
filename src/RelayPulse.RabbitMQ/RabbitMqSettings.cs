@@ -1,3 +1,5 @@
+using RelayPulse.RabbitMQ.Subscribers;
+
 namespace RelayPulse.RabbitMQ;
 
 public record RabbitMqSettings : 
@@ -14,7 +16,9 @@ public record RabbitMqSettings :
     /// Valid values are null, fanout, direct, topic and headers
     /// </summary>
     public string? DefaultExchangeType { get; init; }
-    
+
+    public int? DefaultPrefetchCount { get; init; }
+
     public string? DefaultTenant { get; init; }
     
     /// <summary>
@@ -36,6 +40,8 @@ public record RabbitMqSettings :
     public bool? UseChannelPerType { get; init; }
 
     public QueueSettings[]? Queues { get; init; }
+    
+    public string? SentAtHeaderName { get; init; }
 }
 
 public record QueueSettings
@@ -77,6 +83,8 @@ public record QueueSettings
     /// </summary>
     public int? RetryDelayInSeconds { get; init; }
     public QueueBinding? Binding { get; init; }
+    
+    public int? PrefetchCount { get; init; }
 }
 
 public record QueueBinding

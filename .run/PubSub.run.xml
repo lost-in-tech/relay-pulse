@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="PubSub" type="CompoundRunConfigurationType">
+    <toRun name="Samples.SubscriberExample" type="LaunchSettings" />
+    <toRun name="Samples.PublishExamples" type="DotNetProject" />
+    <method v="2" />
+  </configuration>
+</component>

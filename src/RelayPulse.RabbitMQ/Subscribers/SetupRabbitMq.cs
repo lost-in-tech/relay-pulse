@@ -1,4 +1,4 @@
-namespace RelayPulse.RabbitMQ;
+namespace RelayPulse.RabbitMQ.Subscribers;
 
 internal class SetupRabbitMq(
     IRabbitMqWrapper wrapper, 
@@ -30,7 +30,8 @@ internal class SetupRabbitMq(
                     Exchange = exchange,
                     Name = queue.Name,
                     ExchangeType = exchangeType,
-                    RetryExchange = queue.RetryFeatureDisabled ? null : queue.RetryExchange,
+                    RetryExchange = queue.RetryFeatureDisabled ? null : queue.RetryExchange.EmptyAlternative($"{exchange}-rtx"),
+                    RetryQueue = queue.RetryFeatureDisabled ? null : queue.RetryQueue.EmptyAlternative($"{exchange}-rtq"),
                     DeadLetterExchange = queue.DeadLetterDisabled ? null : queue.DeadLetterExchange
                 });
                 
@@ -79,7 +80,7 @@ internal class SetupRabbitMq(
 
                 if (!exchangeCreated.ContainsKey(retryExchange))
                 {
-                    wrapper.ExchangeDeclare(channel, retryExchange, Constants.ExchangeTypeDirect);
+                    wrapper.ExchangeDeclare(channel, retryExchange, Constants.ExchangeTypeTopic);
                 
                     exchangeCreated[retryExchange] = retryExchange;
                 }
@@ -95,7 +96,7 @@ internal class SetupRabbitMq(
                 
                 wrapper.QueueDeclare(channel, retryQueue, retryQueueArgs);
                 
-                wrapper.QueueBind(channel, retryQueue, retryExchange, string.Empty, null);
+                wrapper.QueueBind(channel, retryQueue, retryExchange, "*", null);
             }
             
             wrapper.QueueDeclare(channel, queue.Name, queueDeclareArgs);
@@ -169,7 +170,9 @@ internal class SetupRabbitMq(
                 Name = queue.Name,
                 DeadLetterExchange = deadLetterExchange,
                 ExchangeType = exchangeType,
-                RetryExchange = retryExchange
+                RetryExchange = retryExchange,
+                RetryQueue = queue.RetryQueue.EmptyAlternative($"{exchange}-rtq"),
+                PrefetchCount = queue.PrefetchCount ?? settings.DefaultPrefetchCount
             });
         }
         
@@ -186,6 +189,8 @@ public interface IQueueSettings
     /// </summary>
     public string? DefaultExchangeType { get; }
     
+    public int? DefaultPrefetchCount { get; }
+    
     QueueSettings[]? Queues { get; }
 }
 
@@ -195,5 +200,7 @@ public record QueueInfo
     public required string Exchange { get; init; }
     public required string ExchangeType { get; init; }
     public string? DeadLetterExchange { get; init; }
-    public string? RetryExchange { get; init; } 
+    public string? RetryExchange { get; init; }
+    public int? PrefetchCount { get; init; }
+    public string? RetryQueue { get; set; }
 }

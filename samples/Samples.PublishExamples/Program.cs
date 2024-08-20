@@ -4,7 +4,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using RelayPulse.Core;
 using RelayPulse.RabbitMQ;
-using Samples.PublishExamples;
 
 var config = new ConfigurationBuilder().Build();
     
@@ -25,30 +24,25 @@ sc.AddRabbitMqRelayPulse(config, new RabbitMqRelayHubOptions
         ]
     }
 });
-sc.AddHostedService<Worker>();
 
 var sp = sc.BuildServiceProvider();
-//
-// var msgListener = sp.GetRequiredService<IMessageListener>();
-//
-// await msgListener.Listen(CancellationToken.None);
-
 var publisher = sp.GetRequiredService<IMessagePublisher>();
-
-await publisher.Message(new OrderCreated
+while (true)
 {
-    Id = "order-123"
-}).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
+    Console.WriteLine("enter order id");
+    var input = Console.ReadLine();
+    if(input == string.Empty || input == "x") break;
 
-await publisher.Message(new OrderCancelled
-{
-    Id = "order-124"
-}).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
-
-await publisher.Message(new OrderLost
-{
-    Id = "order-124"
-}).Tenant("au").Expiry(10).AppId("api-bookworm").Publish();
+    await publisher.Publish(new Message<OrderCreated>
+    {
+        Id = Guid.NewGuid(),
+        AppId = "sample-console",
+        Content = new OrderCreated
+        {
+            Id = input!
+        }
+    });
+}
 
 Console.WriteLine("Hello, World!");
 

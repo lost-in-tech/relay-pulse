@@ -1,6 +1,7 @@
 ﻿using System.Text;
 using RabbitMQ.Client;
 using RelayPulse.Core;
+using RelayPulse.RabbitMQ.Publishers;
 
 namespace RelayPulse.RabbitMQ;
 
@@ -81,6 +82,7 @@ internal interface IMessagePublishSettings
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
     public string? MessageTypeHeaderName { get; }
+    public string? SentAtHeaderName { get; }
     public string? TenantHeaderName { get; }
     public string? AppIdHeaderName { get; }
 }

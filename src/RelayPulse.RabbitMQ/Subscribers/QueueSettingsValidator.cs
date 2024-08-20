@@ -1,4 +1,4 @@
-namespace RelayPulse.RabbitMQ;
+namespace RelayPulse.RabbitMQ.Subscribers;
 
 internal sealed class QueueSettingsValidator
 {

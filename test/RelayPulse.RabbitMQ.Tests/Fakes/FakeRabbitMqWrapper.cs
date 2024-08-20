@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Unicode;
 using NSubstitute;
 using RabbitMQ.Client;
+using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ.Tests.Fakes;
 
@@ -9,9 +10,9 @@ public class FakeRabbitMqWrapper(IMessageSerializer serializer) : IRabbitMqWrapp
 {
     private BasicPublishInput? _lastPublishInput;
     private int _totalPublishExecutionCount;
-    private List<ExchangeDeclareCallInfo> _exchangeDeclareCalls = new();
-    private List<QueueDeclareCallInfo> _queueDeclareCalls = new();
-    private List<QueueBindCallInfo> _queueBindCalls = new();
+    private readonly List<ExchangeDeclareCallInfo> _exchangeDeclareCalls = new();
+    private readonly List<QueueDeclareCallInfo> _queueDeclareCalls = new();
+    private readonly List<QueueBindCallInfo> _queueBindCalls = new();
 
 
     public ExchangeDeclareCallInfo[] ExchangeDeclares => _exchangeDeclareCalls.ToArray();

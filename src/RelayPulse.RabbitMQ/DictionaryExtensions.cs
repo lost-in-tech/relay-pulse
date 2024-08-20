@@ -18,4 +18,54 @@ public static class DictionaryExtensions
         
         return double.TryParse(strValue, out var value) ? value : default;
     }
+    
+    
+    public static void Expiry(this IDictionary<string, object> source, int? expiryInSeconds)
+    {
+        if(expiryInSeconds is null or 0) return;
+        
+        source[Constants.HeaderExpiryKey] = expiryInSeconds.Value * 1000;
+    }
+
+    public static int? Expiry(this IDictionary<string, object> source)
+    {
+        return source.TryGetValue(Constants.HeaderExpiryKey, out var value) ? (int)value/1000 : null;
+    }
+    
+    public static void Expiry(this IDictionary<string, string> source, int? expiryInSeconds)
+    {
+        if(expiryInSeconds is null or 0) return;
+        
+        source[Constants.HeaderExpiryKey] = expiryInSeconds.Value.ToString("F0");
+    }
+
+    public static int? Expiry(this IDictionary<string, string> source)
+    {
+        return source.TryGetValue(Constants.HeaderExpiryKey, out var value) ? int.TryParse(value, out var intVal) ? intVal : null : null;
+    }
+    
+    
+    public static void RetryCount(this IDictionary<string, object> source, int retryCount)
+    {
+        if(retryCount == 0) return;
+        
+        source[Constants.HeaderRetryCount] = retryCount.ToString("F0");
+    }
+
+    public static int RetryCount(this IDictionary<string, object> source)
+    {
+        return source.TryGetValue(Constants.HeaderRetryCount, out var value) ? (int)value : 0;
+    }
+    
+    public static void RetryCount(this IDictionary<string, string> source, int retryCount)
+    {
+        if(retryCount == 0) return;
+        
+        source[Constants.HeaderRetryCount] = retryCount.ToString("F0");
+    }
+
+    public static int RetryCount(this IDictionary<string, string> source)
+    {
+        return source.TryGetValue(Constants.HeaderRetryCount, out var value) ? int.TryParse(value, out var intVal) ? intVal : 0 : 0;
+    }
 }

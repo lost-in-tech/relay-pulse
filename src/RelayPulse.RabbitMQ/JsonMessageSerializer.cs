@@ -1,14 +1,10 @@
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ;
 
-public interface IMessageSerializer
-{
-    string Serialize<T>(T value);
-    T Deserialize<T>(Stream value);
-}
 
 internal sealed class MessageSerializer : IMessageSerializer
 {
@@ -30,5 +26,10 @@ internal sealed class MessageSerializer : IMessageSerializer
     public T Deserialize<T>(Stream value)
     {
         return JsonSerializer.Deserialize<T>(value, _options)!;
+    }
+
+    public object? Deserialize(Stream value, Type type)
+    {
+        return JsonSerializer.Deserialize(value, type, _options)!;
     }
 }

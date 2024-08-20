@@ -2,6 +2,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using RelayPulse.Core;
+using RelayPulse.RabbitMQ.Publishers;
+using RelayPulse.RabbitMQ.Subscribers;
 
 namespace RelayPulse.RabbitMQ;
 
@@ -22,6 +24,7 @@ public static class IocSetup
         
         services.TryAddSingleton<BasicPropertiesBuilder>();
         services.TryAddSingleton<IUniqueId, UniqueId>();
+        services.TryAddSingleton<IClockWrap,ClockWrap>();
         services.TryAddSingleton<IMessagePublisher, MessagePublisher>();
         
         services.TryAddSingleton<IRabbitMqConnectionInstance, RabbitMqConnectionInstance>();
@@ -35,6 +38,7 @@ public static class IocSetup
         services.TryAddSingleton<QueueSettingsValidator>();
         services.TryAddSingleton<SetupRabbitMq>();
         services.TryAddSingleton<IMessageListener, MessageListener>();
+        services.TryAddSingleton<MessageBroadcaster>();
 
         return services;
     }
