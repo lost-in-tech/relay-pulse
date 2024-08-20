@@ -38,7 +38,7 @@ public static class IocSetup
         services.TryAddSingleton<QueueSettingsValidator>();
         services.TryAddSingleton<SetupRabbitMq>();
         services.TryAddSingleton<IMessageListener, MessageListener>();
-        services.TryAddSingleton<MessageBroadcaster>();
+        services.TryAddSingleton<MessageSubscriber>();
 
         return services;
     }

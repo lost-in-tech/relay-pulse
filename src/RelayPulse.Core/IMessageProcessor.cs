@@ -30,7 +30,8 @@ public abstract class MessageProcessor<T> : IMessageProcessor
             Type = input.Type,
             AppId = input.AppId,
             SentAt = input.SentAt,
-            UserId = input.UserId
+            UserId = input.UserId,
+            RetryCount = input.RetryCount
         }, ct);
     }
 
@@ -55,6 +56,25 @@ public record MessageProcessorInput
 
 public record MessageProcessorInput<T> : MessageProcessorInput
 {
+    public MessageProcessorInput()
+    {
+    }
+
+    public MessageProcessorInput(MessageProcessorInput input, T content)
+    {
+        Content = content;
+        Queue = input.Queue;
+        Type = input.Type;
+        Cid = input.Cid;
+        Id = input.Id;
+        Tenant = input.Tenant;
+        AppId = input.AppId;
+        UserId = input.UserId;
+        SentAt = input.SentAt;
+        RetryCount = input.RetryCount;
+        Headers = input.Headers;
+    }
+    
     public required T Content { get; init; }
 }
 

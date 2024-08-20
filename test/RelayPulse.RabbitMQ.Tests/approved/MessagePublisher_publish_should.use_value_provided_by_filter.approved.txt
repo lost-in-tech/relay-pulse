@@ -8,6 +8,7 @@
     "rp-appid": "AppIdFiltered",
     "rp-tenant": "TenantFiltered",
     "rp-msg-type": "TypeFiltered",
+    "rp-sent-at": "2024-08-20T00:00:00.0000000",
     "item-filter": "itemFilterValue"
   },
   "messageId": "d1438a72-dab3-41b8-b3dd-1f5abd7713e3",

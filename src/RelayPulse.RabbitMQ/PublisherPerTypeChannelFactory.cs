@@ -5,8 +5,8 @@ namespace RelayPulse.RabbitMQ;
 
 internal interface IChannelFactory : IDisposable
 {
-    IModel GetOrCreate(string typeName);
-    bool IsApplicable(string typeName, bool forPublisher);
+    IModel GetOrCreate(string key);
+    bool IsApplicable(string key, bool forPublisher);
 }
 
 internal sealed class PublisherDefaultChannelFactory(
@@ -16,9 +16,9 @@ internal sealed class PublisherDefaultChannelFactory(
 {
     private readonly Lazy<IModel> _lazyChannel = new(() => connection.Get().CreateModel());
 
-    public IModel GetOrCreate(string typeName) => _lazyChannel.Value;
+    public IModel GetOrCreate(string key) => _lazyChannel.Value;
 
-    public bool IsApplicable(string typeName, bool forPublisher)
+    public bool IsApplicable(string key, bool forPublisher)
     {
         return forPublisher && settings.UseChannelPerType is null or false;
     }
@@ -58,7 +58,7 @@ internal sealed class PublisherPerTypeChannelFactory(
         return channel;
     }
 
-    public bool IsApplicable(string typeName, bool forPublisher)
+    public bool IsApplicable(string key, bool forPublisher)
     {
         return forPublisher && (settings.UseChannelPerType ?? false);
     }

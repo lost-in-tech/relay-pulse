@@ -9,7 +9,7 @@ internal sealed class MessageListener(
     QueueSettingsValidator validator,
     IQueueSettings settings,
     IChannelFactory channelFactory,
-    MessageBroadcaster broadcaster) : IMessageListener, IDisposable
+    MessageSubscriber subscriber) : IMessageListener, IDisposable
 {
     private QueueInfo[] _queues = Array.Empty<QueueInfo>();
     private List<(IModel Channel, AsyncEventingBasicConsumer Consumer)> _consumers = new List<(IModel, AsyncEventingBasicConsumer)>();
@@ -34,7 +34,7 @@ internal sealed class MessageListener(
             var consumer = new AsyncEventingBasicConsumer(channel);
             consumer.Received += async (_, args) =>
             {
-                await broadcaster.Broadcast(channel, queue, args, ct);
+                await subscriber.Subscribe(channel, queue, args, ct);
             };
 
             channel.BasicConsume(queue.Name, false, Guid.NewGuid().ToString(), false, false, null, consumer);

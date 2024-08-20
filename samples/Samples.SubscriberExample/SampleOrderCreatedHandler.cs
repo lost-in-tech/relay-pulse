@@ -8,6 +8,11 @@ public class SampleOrderCreatedHandler : MessageProcessor<OrderCreated>
     
     protected override async Task<MessageProcessorResponse> Process(MessageProcessorInput<OrderCreated> input, CancellationToken ct)
     {
+        if (input.RetryCount.HasValue && input.RetryCount.Value is  >= 1 and  <= 2)
+        {
+            MessageProcessorResponse.TransientFailure("try again");
+        }
+        
         Console.WriteLine($"message handled by processor");
 
         var d = rnd.Next(1, 100);
