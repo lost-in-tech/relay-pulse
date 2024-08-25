@@ -1,14 +1,18 @@
 ﻿{
-  "exchange": "bookworm.events",
+  "exchange": "default-exchange",
   "routingKey": "",
-  "body": "eyJpZCI6IjEyMyJ9",
+  "body": "eyJpZCI6Im9yZGVyLWEyMyJ9",
   "basicProperties": {
+    "appId": "test-app-id",
     "contentEncoding": "utf-8",
     "contentType": "application/json",
     "deliveryMode": 0,
+    "expiration": "60000",
     "headers": {
-      "rp-msg-type": "order-created",
-      "rp-sent-at": "2024-08-20T00:00:00.0000000"
+      "jb-app-id": "test-app-id",
+      "jb-tenant": "default-tenant",
+      "jb-msg-type": "type-prefix-order-created",
+      "jb-sent-at": "2024-08-20T00:00:00.0000000"
     },
     "messageId": "8f690adf-fa38-4751-b435-deeb2ed9dffb",
     "persistent": false,
@@ -16,7 +20,7 @@
     "timestamp": {
       "unixTime": 0
     },
-    "type": "RelayPulse.RabbitMQ.Tests.MessagePublisher_publish_should\u002BOrderCreated",
+    "type": "RelayPulse.RabbitMQ.Tests.MessagePublisherTests\u002BOrderCreated",
     "userId": "",
     "protocolClassId": 0,
     "protocolClassName": ""

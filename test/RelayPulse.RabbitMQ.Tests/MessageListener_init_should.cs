@@ -15,12 +15,7 @@ public class MessageListener_init_should(IocFixture fixture) : IClassFixture<Ioc
     {
         var sp = fixture.Services();
         var sut = sp.GetRequiredService<IMessageListener>();
-        await sut.Init(CancellationToken.None);
-        var gotWrapper = sp.GetRequiredService<IRabbitMqWrapper, FakeRabbitMqWrapper>();
-
-        gotWrapper.ExchangeDeclareCalls.ShouldBeEmpty();
-        gotWrapper.QueueDeclareCalls.ShouldBeEmpty();
-        gotWrapper.QueueBindCalls.ShouldBeEmpty();
+        await Should.ThrowAsync<RelayPulseException>(async () =>  await sut.Init(CancellationToken.None));
     }
 
     [Theory]
