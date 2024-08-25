@@ -8,6 +8,9 @@
         <Authors>Mohammad Ruhul Amin</Authors>
         <Description>Client library for pubsub using RabbitMQ</Description>
         <PackageTags>RabbitMQ,Pubsub</PackageTags>
+        <PackageId>RelayPulse.RabbitMQ</PackageId>
+        <PackageProjectUrl>https://github.com/lost-in-tech/relay-pulse</PackageProjectUrl>
+        <Copyright>MIT</Copyright>
     </PropertyGroup>
 
     <ItemGroup>

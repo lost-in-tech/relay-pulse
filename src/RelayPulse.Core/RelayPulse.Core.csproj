@@ -5,6 +5,12 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>RelayPulse.Core</RootNamespace>
+        <Authors>Mohammad Ruhul Amin</Authors>
+        <Description>Pub sub abstraction</Description>
+        <PackageTags>PubSub,RabbitMQ</PackageTags>
+        <PackageId>RelayPulse.Core</PackageId>
+        <PackageProjectUrl>https://github.com/lost-in-tech/relay-pulse</PackageProjectUrl>
+        <Copyright>MIT</Copyright>
     </PropertyGroup>
 
 </Project>
