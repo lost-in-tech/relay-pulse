@@ -19,17 +19,17 @@ public static class HaveMessageExtensions
         return msg.Header(Constants.HeaderExchange, exchange);
     }
     
-    public static IHaveHeaders Routing(this IHaveMessage msg, string routingKey)
+    public static IHaveHeaders RouteKey(this IHaveMessage msg, string routingKey)
     {
         return msg.Header(Constants.HeaderRoutingKey, routingKey);
     }
     
-    public static IHaveHeaders Routing(this IHaveTenant msg, string routingKey)
+    public static IHaveHeaders RouteKey(this IHaveTenant msg, string routingKey)
     {
         return msg.Header(Constants.HeaderRoutingKey, routingKey);
     }
     
-    public static IHaveHeaders Routing(this IHaveHeaders msg, string routingKey)
+    public static IHaveHeaders RouteKey(this IHaveHeaders msg, string routingKey)
     {
         return msg.Header(Constants.HeaderRoutingKey, routingKey);
     }

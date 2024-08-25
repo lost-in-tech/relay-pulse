@@ -136,7 +136,7 @@ public partial class MessagePublisherTests(IocFixture fixture) : IClassFixture<I
         });
 
         var sut = services.GetRequiredService<IMessagePublisher>();
-
+        
         var givenMsg = new OrderCreated
         {
             Id = "123"
@@ -187,7 +187,7 @@ public partial class MessagePublisherTests(IocFixture fixture) : IClassFixture<I
         };
 
         var rsp = await sut.Message(givenMsg)
-            .Routing(giveRoutingKey)
+            .RouteKey(giveRoutingKey)
             .Publish();
 
 
