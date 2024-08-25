@@ -1,0 +1,24 @@
+﻿{
+  "exchange": "bookworm.events",
+  "routingKey": "",
+  "body": "eyJpZCI6IjEyMyJ9",
+  "basicProperties": {
+    "contentEncoding": "utf-8",
+    "contentType": "application/json",
+    "deliveryMode": 0,
+    "headers": {
+      "rp-msg-type": "order-created",
+      "rp-sent-at": "2024-08-20T00:00:00.0000000"
+    },
+    "messageId": "8f690adf-fa38-4751-b435-deeb2ed9dffb",
+    "persistent": false,
+    "priority": 0,
+    "timestamp": {
+      "unixTime": 0
+    },
+    "type": "RelayPulse.RabbitMQ.Tests.MessagePublisherTests\u002BOrderCreated",
+    "userId": "",
+    "protocolClassId": 0,
+    "protocolClassName": ""
+  }
+}

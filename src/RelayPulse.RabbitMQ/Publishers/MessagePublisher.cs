@@ -5,7 +5,8 @@ using RelayPulse.RabbitMQ.Publishers;
 
 namespace RelayPulse.RabbitMQ;
 
-internal sealed class MessagePublisher(
+internal sealed class 
+    MessagePublisher(
     IRabbitMqWrapper rabbitMqWrapper,
     IMessagePublishSettings settings,
     IEnumerable<IChannelFactory> channelFactories,
@@ -30,7 +31,7 @@ internal sealed class MessagePublisher(
 
         if (string.IsNullOrWhiteSpace(exchange))
         {
-            throw new Exception("Exchange name cannot be empty. Make sure you provide exchange name.");
+            throw new RelayPulseException("Exchange name cannot be empty. Make sure you provide exchange name.");
         }
 
         var channel = GetChannel(typeName, type);
@@ -43,7 +44,7 @@ internal sealed class MessagePublisher(
             Body = Encoding.UTF8.GetBytes(serializer.Serialize(msg.Content)),
             Exchange = exchange,
             RoutingKey = msg.Headers.PopValue(Constants.HeaderRoutingKey) ?? string.Empty,
-            BasicProperties = props
+            BasicProperties = props,
         });
 
         return Task.FromResult(new MessagePublishResponse

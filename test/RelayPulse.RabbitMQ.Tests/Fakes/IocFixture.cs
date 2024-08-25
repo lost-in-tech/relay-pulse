@@ -1,6 +1,8 @@
+using Castle.Core.Logging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 
 namespace RelayPulse.RabbitMQ.Tests.Fakes;
@@ -27,7 +29,7 @@ public sealed class IocFixture
         sc.Replace(ServiceDescriptor.Singleton<IUniqueId, FakeUniqueId>());
         sc.Replace(ServiceDescriptor.Singleton<IRabbitMqWrapper, FakeRabbitMqWrapper>());
         sc.Replace(ServiceDescriptor.Singleton<IRabbitMqConnectionInstance, FakeRabbitMqConnectionInstance>());
-        
+        sc.Replace(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(FakeLogger<>)));
         return sc.BuildServiceProvider();
     }
 }

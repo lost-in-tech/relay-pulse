@@ -82,19 +82,14 @@ public record QueueSettings
     /// Default will be 60 seconds
     /// </summary>
     public int? RetryDelayInSeconds { get; init; }
-    public QueueBinding? Binding { get; init; }
+    public QueueBinding[]? Bindings { get; init; }
     
     public int? PrefetchCount { get; init; }
 }
 
 public record QueueBinding
 {
-    public string[]? RoutingKeyBindings { get; init; }
-    public IEnumerable<HeaderBinding>? HeaderBindings { get; init; }
-}
-
-public record HeaderBinding
-{
-    public bool MatchAny { get; init; }
-    public required Dictionary<string,string> Args { get; init; }
+    public bool? MatchAny { get; init; }
+    public string? RoutingKey { get; init; }
+    public Dictionary<string,string>? Headers { get; init; }
 }

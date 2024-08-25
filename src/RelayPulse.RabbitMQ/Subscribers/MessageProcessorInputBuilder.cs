@@ -6,7 +6,7 @@ namespace RelayPulse.RabbitMQ.Subscribers;
 
 internal static class MessageProcessorInputBuilder
 {
-    public static MessageProcessorInput Build(QueueInfo queueInfo, BasicDeliverEventArgs args)
+    public static MessageProcessorInput  Build(QueueInfo queueInfo, BasicDeliverEventArgs args)
     {
         return new MessageProcessorInput
         {

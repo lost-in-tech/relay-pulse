@@ -15,7 +15,9 @@ public class FakeRabbitMqWrapper(IMessageSerializer serializer) : IRabbitMqWrapp
     private readonly List<QueueBindCallInfo> _queueBindCalls = new();
 
 
-    public ExchangeDeclareCallInfo[] ExchangeDeclares => _exchangeDeclareCalls.ToArray();
+    public ExchangeDeclareCallInfo[] ExchangeDeclareCalls => _exchangeDeclareCalls.ToArray();
+    public QueueDeclareCallInfo[] QueueDeclareCalls => _queueDeclareCalls.ToArray();
+    public QueueBindCallInfo[] QueueBindCalls => _queueBindCalls.ToArray();
     
     
     public RabbitMqPublishCallInfo<T> GetLastUsedPublishInput<T>()

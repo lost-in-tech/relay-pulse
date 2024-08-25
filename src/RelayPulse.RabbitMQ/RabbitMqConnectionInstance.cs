@@ -9,7 +9,7 @@ internal interface IRabbitMqConnectionInstance
 
 internal interface IRabbitMqConnectionSettings
 {
-    public string Uri { get; init; }
+    public string Uri { get; }
 }
 
 internal sealed class RabbitMqConnectionInstance : IRabbitMqConnectionInstance

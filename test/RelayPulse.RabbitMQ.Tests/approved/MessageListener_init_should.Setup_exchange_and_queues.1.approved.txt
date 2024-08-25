@@ -1,0 +1,35 @@
+﻿{
+  "exchangeDeclareCalls": [
+    {
+      "name": "default-exchange",
+      "type": "fanout"
+    },
+    {
+      "name": "default-exchange-dlx",
+      "type": "topic"
+    }
+  ],
+  "queueDeclareCalls": [
+    {
+      "name": "default-exchange-dlq"
+    },
+    {
+      "name": "queue-fanout",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange-dlx"
+      }
+    }
+  ],
+  "queueBindCalls": [
+    {
+      "queue": "default-exchange-dlq",
+      "exchange": "default-exchange-dlx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "queue-fanout",
+      "exchange": "default-exchange",
+      "routeKey": ""
+    }
+  ]
+}

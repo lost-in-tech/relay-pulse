@@ -1,0 +1,5 @@
+﻿{
+  "uri": "",
+  "defaultExchange": "bookworm-exchange",
+  "defaultExchangeType": "direct"
+}

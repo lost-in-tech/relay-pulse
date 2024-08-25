@@ -21,7 +21,22 @@ internal class SetupRabbitMq(
             if (!exchange.HasValue()) throw new Exception("Exchange name cannot be empty");
             
             var exchangeType = queue.ExchangeType.TryPickNonEmpty(settings.DefaultExchangeType)
-                .EmptyAlternative(Constants.ExchangeTypeDirect);
+                .EmptyAlternative(ExchangeTypesSupported.Direct);
+
+            var deadLetterExchange = queue.DeadLetterDisabled
+                ? null
+                : queue.DeadLetterExchange.EmptyAlternative(DefaultDeadLetterExchange(exchange));
+            var deadLetterQueue = queue.DeadLetterDisabled
+                ? null
+                : queue.DeadLetterQueue.EmptyAlternative(DefaultDeadLetterQueue(exchange));
+            
+
+            var retryExchange = queue.RetryFeatureDisabled
+                ? null
+                : queue.RetryExchange.EmptyAlternative(DefaultRetryExchange(exchange));
+            var retryQueue = queue.RetryFeatureDisabled
+                ? null
+                : queue.RetryQueue.EmptyAlternative(DefaultRetryQueue(exchange));
             
             if (queue.SkipSetup ?? false)
             {
@@ -30,9 +45,9 @@ internal class SetupRabbitMq(
                     Exchange = exchange,
                     Name = queue.Name,
                     ExchangeType = exchangeType,
-                    RetryExchange = queue.RetryFeatureDisabled ? null : queue.RetryExchange.EmptyAlternative($"{exchange}-rtx"),
-                    RetryQueue = queue.RetryFeatureDisabled ? null : queue.RetryQueue.EmptyAlternative($"{exchange}-rtq"),
-                    DeadLetterExchange = queue.DeadLetterDisabled ? null : queue.DeadLetterExchange
+                    RetryExchange = retryExchange,
+                    RetryQueue = retryQueue,
+                    DeadLetterExchange = deadLetterExchange
                 });
                 
                 continue;
@@ -52,40 +67,32 @@ internal class SetupRabbitMq(
                 queueDeclareArgs[Constants.HeaderTimeToLive] = queue.MsgExpiryInSeconds.Value * 1000;
             }
 
-            var deadLetterExchange = queue.DeadLetterExchange;
-            if (!queue.DeadLetterDisabled)
+            if (deadLetterExchange.HasValue()
+                && deadLetterQueue.HasValue())
             {
-                deadLetterExchange = queue.DeadLetterExchange.EmptyAlternative($"{exchange}-dlx");
-
                 if (!exchangeCreated.ContainsKey(deadLetterExchange))
                 {
-                    wrapper.ExchangeDeclare(channel, deadLetterExchange, Constants.ExchangeTypeDirect);
+                    wrapper.ExchangeDeclare(channel, deadLetterExchange, ExchangeTypesSupported.Topic);
                 
                     exchangeCreated[deadLetterExchange] = deadLetterExchange;
                 }
 
-                var deadLetterQueue = queue.DeadLetterQueue.EmptyAlternative($"{exchange}-dlq");
                 wrapper.QueueDeclare(channel, deadLetterQueue, null);
                 
-                wrapper.QueueBind(channel, deadLetterQueue, deadLetterExchange, string.Empty, null);
+                wrapper.QueueBind(channel, deadLetterQueue, deadLetterExchange, "*", null);
 
                 queueDeclareArgs[Constants.HeaderDeadLetterExchange] = deadLetterExchange;
             }
 
-            var retryExchange = queue.RetryExchange;
 
-            if (!queue.RetryFeatureDisabled)
+            if (retryExchange.HasValue() && retryQueue.HasValue())
             {
-                retryExchange = queue.RetryExchange.EmptyAlternative($"{exchange}-rtx");
-
                 if (!exchangeCreated.ContainsKey(retryExchange))
                 {
-                    wrapper.ExchangeDeclare(channel, retryExchange, Constants.ExchangeTypeTopic);
+                    wrapper.ExchangeDeclare(channel, retryExchange, ExchangeTypesSupported.Topic);
                 
                     exchangeCreated[retryExchange] = retryExchange;
                 }
-
-                var retryQueue = queue.RetryQueue.EmptyAlternative($"{exchange}-rtq");
 
                 var retryQueueArgs = new Dictionary<string, object>
                 {
@@ -101,9 +108,9 @@ internal class SetupRabbitMq(
             
             wrapper.QueueDeclare(channel, queue.Name, queueDeclareArgs);
 
-            var binding = queue.Binding ?? new QueueBinding();
+            var queueBinding = queue.Bindings ?? [];
 
-            if (exchangeType == Constants.ExchangeTypeHeader)
+            if (exchangeType == ExchangeTypesSupported.Headers)
             {
                 if (!queue.RetryFeatureDisabled)
                 {
@@ -114,49 +121,48 @@ internal class SetupRabbitMq(
                     });
                 }
 
-                if (binding.HeaderBindings != null)
+                foreach (var binding in queueBinding)
                 {
-                    foreach (var headerBinding in binding.HeaderBindings)
+                    var bindingArgs = new Dictionary<string, object>();
+
+                    var headersToBind = binding.Headers;
+
+                    if(headersToBind == null || headersToBind.Count == 0) continue;
+                    
+                    foreach (var headerToBind in headersToBind)
                     {
-                        var bindingArgs = new Dictionary<string, object>();
-
-                        var givenArgs = headerBinding.Args;
-
-                        foreach (var arg in givenArgs)
-                        {
-                            bindingArgs[arg.Key] = arg.Value;
-                        }
-
-                        if (headerBinding.MatchAny)
-                        {
-                            bindingArgs[Constants.HeaderMatch] = "any";
-                        }
-                        else
-                        {
-                            bindingArgs[Constants.HeaderMatch] = "all";
-                        }
-                        
-                        wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, bindingArgs);
+                        bindingArgs[headerToBind.Key] = headerToBind.Value;
                     }
+
+                    if (binding.MatchAny ?? false)
+                    {
+                        bindingArgs[Constants.HeaderMatch] = "any";
+                    }
+                    else
+                    {
+                        bindingArgs[Constants.HeaderMatch] = "all";
+                    }
+                        
+                    wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, bindingArgs);
                 }
             }
-            else if (exchangeType != Constants.ExchangeTypeFanout)
+            else if (exchangeType != ExchangeTypesSupported.Fanout)
             {
                 if (!queue.RetryFeatureDisabled)
                 {
                     wrapper.QueueBind(channel, queue.Name, exchange, Constants.RouteKeyTargetQueue(queue.Name), null);
                 }
 
-                if (binding.RoutingKeyBindings?.Length is > 0) 
+                foreach (var binding in queueBinding)
                 {
-                    foreach (var routingKeyBinding in binding.RoutingKeyBindings)
+                    if (binding.RoutingKey.HasValue())
                     {
-                        wrapper.QueueBind(channel, queue.Name, exchange, routingKeyBinding, null);
+                        wrapper.QueueBind(channel, queue.Name, exchange, binding.RoutingKey, null);
                     }
-                }
-                else
-                {
-                    wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, null);
+                    else
+                    {
+                        wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, null);
+                    }
                 }
             }
             else
@@ -171,13 +177,18 @@ internal class SetupRabbitMq(
                 DeadLetterExchange = deadLetterExchange,
                 ExchangeType = exchangeType,
                 RetryExchange = retryExchange,
-                RetryQueue = queue.RetryQueue.EmptyAlternative($"{exchange}-rtq"),
+                RetryQueue = retryQueue,
                 PrefetchCount = queue.PrefetchCount ?? settings.DefaultPrefetchCount
             });
         }
         
         return result.ToArray();
     }
+
+    private string DefaultDeadLetterExchange(string exchange) => $"{exchange}-dlx";
+    private string DefaultDeadLetterQueue(string exchange) => $"{exchange}-dlq";
+    private string DefaultRetryExchange(string exchange) => $"{exchange}-rtx";
+    private string DefaultRetryQueue(string exchange) => $"{exchange}-rtq";
 }
 
 public interface IQueueSettings
@@ -202,5 +213,5 @@ public record QueueInfo
     public string? DeadLetterExchange { get; init; }
     public string? RetryExchange { get; init; }
     public int? PrefetchCount { get; init; }
-    public string? RetryQueue { get; set; }
+    public string? RetryQueue { get; init; }
 }

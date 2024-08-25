@@ -12,7 +12,7 @@ internal sealed class MessageListener(
     MessageSubscriber subscriber) : IMessageListener, IDisposable
 {
     private QueueInfo[] _queues = Array.Empty<QueueInfo>();
-    private List<(IModel Channel, AsyncEventingBasicConsumer Consumer)> _consumers = new List<(IModel, AsyncEventingBasicConsumer)>();
+    private List<IModel> _channels = new();
     
     public Task Init(CancellationToken ct)
     {
@@ -44,7 +44,7 @@ internal sealed class MessageListener(
                 channel.BasicQos(0, (ushort)queue.PrefetchCount.Value, false);
             }
             
-            _consumers.Add((channel, consumer));
+            _channels.Add(channel);
         }
         
         return Task.CompletedTask;
@@ -52,14 +52,14 @@ internal sealed class MessageListener(
 
     public void Dispose()
     {
-        foreach (var tuple in _consumers)
+        foreach (var channel in _channels)
         {
-            if (!tuple.Channel.IsClosed)
+            if (!channel.IsClosed)
             {
-                tuple.Channel.Close();
+                channel.Close();
             }
             
-            tuple.Channel.Dispose();
+            channel.Dispose();
         }
     }
 }

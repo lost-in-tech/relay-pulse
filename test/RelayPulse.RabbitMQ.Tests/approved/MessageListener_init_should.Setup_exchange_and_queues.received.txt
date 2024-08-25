@@ -1,0 +1,51 @@
+{
+  "exchangeDeclareCalls": [
+    {
+      "name": "default-exchange",
+      "type": "fanout"
+    },
+    {
+      "name": "default-exchange-dlx",
+      "type": "topic"
+    },
+    {
+      "name": "default-exchange-rtx",
+      "type": "topic"
+    }
+  ],
+  "queueDeclareCalls": [
+    {
+      "name": "default-exchange-dlq"
+    },
+    {
+      "name": "default-exchange-rtq",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange",
+        "x-message-ttl": 60000
+      }
+    },
+    {
+      "name": "queue-fanout",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange-dlx"
+      }
+    }
+  ],
+  "queueBindCalls": [
+    {
+      "queue": "default-exchange-dlq",
+      "exchange": "default-exchange-dlx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "default-exchange-rtq",
+      "exchange": "default-exchange-rtx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "queue-fanout",
+      "exchange": "default-exchange",
+      "routeKey": ""
+    }
+  ]
+}

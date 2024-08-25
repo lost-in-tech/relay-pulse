@@ -1,0 +1,92 @@
+﻿{
+  "exchangeDeclareCalls": [
+    {
+      "name": "default-exchange",
+      "type": "direct"
+    },
+    {
+      "name": "default-exchange-dlx",
+      "type": "topic"
+    },
+    {
+      "name": "default-exchange-rtx",
+      "type": "topic"
+    }
+  ],
+  "queueDeclareCalls": [
+    {
+      "name": "default-exchange-dlq"
+    },
+    {
+      "name": "default-exchange-rtq",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange",
+        "x-message-ttl": 60000
+      }
+    },
+    {
+      "name": "default-queue",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange-dlx"
+      }
+    },
+    {
+      "name": "default-exchange-dlq"
+    },
+    {
+      "name": "default-exchange-rtq",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange",
+        "x-message-ttl": 60000
+      }
+    },
+    {
+      "name": "default-queue2",
+      "args": {
+        "x-dead-letter-exchange": "default-exchange-dlx"
+      }
+    }
+  ],
+  "queueBindCalls": [
+    {
+      "queue": "default-exchange-dlq",
+      "exchange": "default-exchange-dlx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "default-exchange-rtq",
+      "exchange": "default-exchange-rtx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "default-queue",
+      "exchange": "default-exchange",
+      "routeKey": "rp:target:default-queue"
+    },
+    {
+      "queue": "default-queue",
+      "exchange": "default-exchange",
+      "routeKey": ""
+    },
+    {
+      "queue": "default-exchange-dlq",
+      "exchange": "default-exchange-dlx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "default-exchange-rtq",
+      "exchange": "default-exchange-rtx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "default-queue2",
+      "exchange": "default-exchange",
+      "routeKey": "rp:target:default-queue2"
+    },
+    {
+      "queue": "default-queue2",
+      "exchange": "default-exchange",
+      "routeKey": ""
+    }
+  ]
+}

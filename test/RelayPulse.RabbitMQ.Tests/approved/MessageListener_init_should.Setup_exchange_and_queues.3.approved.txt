@@ -1,0 +1,56 @@
+﻿{
+  "exchangeDeclareCalls": [
+    {
+      "name": "non-default-exchange",
+      "type": "topic"
+    },
+    {
+      "name": "non-default-exchange-dlx",
+      "type": "topic"
+    },
+    {
+      "name": "non-default-exchange-rtx",
+      "type": "topic"
+    }
+  ],
+  "queueDeclareCalls": [
+    {
+      "name": "non-default-exchange-dlq"
+    },
+    {
+      "name": "retry-queue",
+      "args": {
+        "x-dead-letter-exchange": "non-default-exchange",
+        "x-message-ttl": 60000
+      }
+    },
+    {
+      "name": "queue-topic",
+      "args": {
+        "x-dead-letter-exchange": "non-default-exchange-dlx"
+      }
+    }
+  ],
+  "queueBindCalls": [
+    {
+      "queue": "non-default-exchange-dlq",
+      "exchange": "non-default-exchange-dlx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "retry-queue",
+      "exchange": "non-default-exchange-rtx",
+      "routeKey": "*"
+    },
+    {
+      "queue": "queue-topic",
+      "exchange": "non-default-exchange",
+      "routeKey": "rp:target:queue-topic"
+    },
+    {
+      "queue": "queue-topic",
+      "exchange": "non-default-exchange",
+      "routeKey": "test-route-key"
+    }
+  ]
+}

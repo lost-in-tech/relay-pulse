@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using RelayPulse.Core;
 using RelayPulse.RabbitMQ.Publishers;
 using RelayPulse.RabbitMQ.Subscribers;
@@ -15,12 +16,12 @@ public static class IocSetup
     {
         options ??= new RabbitMqRelayHubOptions();
 
-        var settings = MergeSettings(configuration, options);
-        
-        services.TryAddSingleton<IRabbitMqConnectionSettings>(settings);
-        services.TryAddSingleton<IMessagePublishSettings>(settings);
-        services.TryAddSingleton<IPublisherChannelSettings>(settings);
-        services.TryAddSingleton<IQueueSettings>(settings);
+        services.Configure<RabbitMqSettings>(configuration.GetSection(options.ConfigSectionName));
+
+        services.TryAddSingleton<IRabbitMqConnectionSettings>(sc => MergeSettings(sc, options));
+        services.TryAddSingleton<IMessagePublishSettings>(sc => MergeSettings(sc, options));
+        services.TryAddSingleton<IPublisherChannelSettings>(sc => MergeSettings(sc, options));
+        services.TryAddSingleton<IQueueSettings>(sc => MergeSettings(sc, options));
         
         services.TryAddSingleton<BasicPropertiesBuilder>();
         services.TryAddSingleton<IUniqueId, UniqueId>();
@@ -39,7 +40,7 @@ public static class IocSetup
         services.TryAddSingleton<SetupRabbitMq>();
         services.TryAddSingleton<IMessageListener, MessageListener>();
         services.TryAddSingleton<MessageSubscriber>();
-
+        
         return services;
     }
 
@@ -50,10 +51,22 @@ public static class IocSetup
 
         return SettingsMerger.Read(options.Settings, config);
     }
+    
+    private static RabbitMqSettings MergeSettings(IServiceProvider sp, RabbitMqRelayHubOptions options)
+    {
+        var config = sp.GetRequiredService<IOptions<RabbitMqSettings>>().Value;
+
+        return MergeSettings(config, options);
+    }
+    
+    private static RabbitMqSettings MergeSettings(RabbitMqSettings configSettings, RabbitMqRelayHubOptions options)
+    {
+        return SettingsMerger.Read(options.Settings, configSettings);
+    }
 }
 
 public record RabbitMqRelayHubOptions
 {
-    public string ConfigSectionName { get; init; } = "RelayPulse.RabbitMQ";
+    public string ConfigSectionName { get; init; } = "RelayPulse:RabbitMQ";
     public RabbitMqSettings? Settings { get; init; }
 }

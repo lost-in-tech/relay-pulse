@@ -15,10 +15,6 @@ internal static class Constants
     public const string HeaderDeadLetterExchange = "x-dead-letter-exchange";
     public const string HeaderTimeToLive = "x-message-ttl";
 
-    public const string ExchangeTypeHeader = "headers";
-    public const string ExchangeTypeFanout = "fanout";
-    public const string ExchangeTypeDirect = "direct";
-    public const string ExchangeTypeTopic = "topic";
     public const string HeaderTargetQueue = "rp-target-queue";
     
     public const string HeaderMatch = "x-match";
@@ -26,4 +22,12 @@ internal static class Constants
     
 
     public static string RouteKeyTargetQueue(string queue) => $"rp:target:{queue}";
+}
+
+public static class ExchangeTypesSupported
+{
+    public const string Headers = "headers";
+    public const string Fanout = "fanout";
+    public const string Direct = "direct";
+    public const string Topic = "topic";
 }

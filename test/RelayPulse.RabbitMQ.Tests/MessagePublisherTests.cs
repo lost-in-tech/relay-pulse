@@ -8,8 +8,59 @@ using Shouldly;
 
 namespace RelayPulse.RabbitMQ.Tests;
 
-public class MessagePublisher_publish_should(IocFixture fixture) : IClassFixture<IocFixture>
+public partial class MessagePublisherTests(IocFixture fixture) : IClassFixture<IocFixture>
 {
+    [Fact]
+    public async Task publish_use_input_provided_by_message()
+    {
+        var givenSettings = new RabbitMqSettings
+        {
+            TypePrefix = "type-prefix-",
+            AppId = "test-app-id",
+            DefaultExchange = "default-exchange",
+            DefaultTenant = "default-tenant",
+            DefaultExpiryInSeconds = 60,
+            AppIdHeaderName = "jb-app-id",
+            MessageTypeHeaderName = "jb-msg-type",
+            SentAtHeaderName = "jb-sent-at",
+            TenantHeaderName = "jb-tenant",
+            DefaultExchangeType = ExchangeTypesSupported.Topic,
+            UseChannelPerType = true
+        };
+
+        var rsp = await Execute(new Message<OrderCreated>
+        {
+            Content = new OrderCreated
+            {
+                Id = "order-a23"
+            }
+        }, givenSettings);
+        
+        rsp.ShouldMatchContent();
+    }
+    
+    [Fact]
+    public async Task publish_use_routing_key_when_provided_in_input()
+    {
+        var rsp = await Execute(new Message<OrderCreated>()
+        {
+            Content = new OrderCreated{ Id = "123"}
+        }.RouteKey("test-route-key"));
+        
+        rsp!.RoutingKey.ShouldBe("test-route-key");
+    }
+    
+    [Fact]
+    public async Task publish_use_msg_expiry_when_provided_in_input()
+    {
+        var rsp = await Execute(new Message<OrderCreated>()
+        {
+            Content = new OrderCreated{ Id = "123"}
+        }.Expiry(10));
+        
+        rsp!.BasicProperties.Expiration.ShouldBe("10000");
+    }
+    
     [Fact]
     public async Task send_correct_payload_to_rabbit_mq_when_only_event_payload_provided()
     {

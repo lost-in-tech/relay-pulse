@@ -1,10 +1,15 @@
+using RelayPulse.Core;
+
 namespace RelayPulse.RabbitMQ.Subscribers;
 
 internal sealed class QueueSettingsValidator
 {
     public void Validate(IQueueSettings settings)
     {
-        if(settings.Queues == null || settings.Queues.Length == 0) return;
+        if (settings.Queues == null || settings.Queues.Length == 0)
+        {
+            throw new RelayPulseException("No queues settings provided");
+        }
 
         foreach (var queue in settings.Queues)
         {
@@ -12,17 +17,17 @@ internal sealed class QueueSettingsValidator
         }
     }
 
-    private static readonly string[] ValidExchangeTypes = [Constants.ExchangeTypeFanout,
-        Constants.ExchangeTypeDirect,
-        Constants.ExchangeTypeTopic,
-        Constants.ExchangeTypeHeader];
+    private static readonly string[] ExchangeTypesSupported = [RabbitMQ.ExchangeTypesSupported.Fanout,
+        RabbitMQ.ExchangeTypesSupported.Direct,
+        RabbitMQ.ExchangeTypesSupported.Topic,
+        RabbitMQ.ExchangeTypesSupported.Headers];
     private void Validate(IQueueSettings settings, QueueSettings queue)
     {
         var exchangeName = queue.Exchange.EmptyAlternative(settings.DefaultExchange);
 
         if (string.IsNullOrWhiteSpace(exchangeName))
         {
-            throw new Exception(
+            throw new RelayPulseException(
                 $"Exchange name cannot be empty. Provide an exchange name for the queue {queue.Name}");
         }
 
@@ -30,36 +35,36 @@ internal sealed class QueueSettingsValidator
 
         if (string.IsNullOrWhiteSpace(exchangeType))
         {
-            throw new Exception($"Exchange type cannot be empty. Provide an exchange type for queue {queue.Name}");
+            throw new RelayPulseException($"Exchange type cannot be empty. Provide an exchange type for queue {queue.Name}");
         }
 
-        if (ValidExchangeTypes.All(xc => xc != exchangeType))
+        if (ExchangeTypesSupported.All(xc => xc != exchangeType))
         {
-            throw new Exception(
-                $"Exchange type not valid. Provide a valid exchange type value. Supported values are {string.Join(", ",ValidExchangeTypes)}");
+            throw new RelayPulseException(
+                $"Exchange type not valid. Provide a valid exchange type value. Supported values are {string.Join(", ",ExchangeTypesSupported)}");
         }
 
         if (!queue.RetryFeatureDisabled)
         {
-            if (exchangeType == Constants.ExchangeTypeFanout)
+            if (exchangeType == RabbitMQ.ExchangeTypesSupported.Fanout)
             {
-                throw new Exception(
+                throw new RelayPulseException(
                     $"Retry feature is not supported for fanout exchange. Either change the exchange type or make retry feature disable. query {queue.Name}");
             }
 
-            if (exchangeType == Constants.ExchangeTypeHeader)
+            if (exchangeType == RabbitMQ.ExchangeTypesSupported.Headers)
             {
-                var totalBindings = queue.Binding?.HeaderBindings?.Count() ?? 0;
+                var totalBindings = queue.Bindings?.Length ?? 0;
 
                 if (totalBindings == 0)
                 {
-                    throw new Exception($"For retry feature to work At least one header binding is required. query {queue.Name}");
+                    throw new RelayPulseException($"For retry feature to work At least one header binding is required. query {queue.Name}");
                 }
                 
-                var anyEmptyArgs = queue.Binding?.HeaderBindings?.Any(x => x.Args.Count == 0) ?? false;
+                var anyEmptyHeaderBindings = queue.Bindings?.Any(x => (x.Headers?.Count ?? 0) == 0) ?? false;
 
-                if (anyEmptyArgs)
-                    throw new Exception(
+                if (anyEmptyHeaderBindings)
+                    throw new RelayPulseException(
                         $"Header bindings with empty headers not supported when retry feature is enabled for query {queue.Name}");
             }
         }

@@ -27,7 +27,7 @@ internal sealed class MessageSubscriber(
             {
                 ["tenant"] = input.Tenant ?? string.Empty,
                 ["cid"] = input.Cid ?? string.Empty,
-                ["srcAppId"] = input.AppId ?? string.Empty,
+                ["publisherAppId"] = input.AppId ?? string.Empty,
                 ["msgId"] = input.Id ?? string.Empty,
                 ["queue"] = input.Queue
             });
@@ -98,7 +98,7 @@ internal sealed class MessageSubscriber(
         }
         catch (Exception e)
         {
-            logger.LogError(e, e.Message);
+            logger.LogError(e, "Processing of message failed with {error} {msgId}", e.Message, args.BasicProperties.MessageId);
 
             channel.BasicReject(args.DeliveryTag, false);
         }
