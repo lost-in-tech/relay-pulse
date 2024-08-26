@@ -11,7 +11,6 @@
         <PackageId>RelayPulse.RabbitMQ</PackageId>
         <PackageProjectUrl>https://github.com/lost-in-tech/relay-pulse</PackageProjectUrl>
         <Copyright>MIT</Copyright>
-        <DocumentationFile>https://github.com/lost-in-tech/relay-pulse</DocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
