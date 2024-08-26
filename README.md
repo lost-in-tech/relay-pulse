@@ -87,7 +87,7 @@ await publisher.Publish(new Message<OrderCreatedEvent>
     Cid = "correlation-id" // optional
     Type = "bookworm-order-created" // optional. default is name of T
     Tenant = "tenant-au" // optional
-    Headers = new Dictionary<string,string>
+    Headers = new Dictionary<string,string> //optional
     {
         ["custom-header"] = "custom-header-value"
     }
