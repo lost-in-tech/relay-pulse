@@ -13,14 +13,14 @@ public static class MessageProcessorExtensions
     /// <param name="ct"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    public static Task<MessageProcessorResponse> Process<T>(this IMessageProcessor source,
-        MessageProcessorInput<T> input, CancellationToken ct = default)
+    public static Task<ConsumerResponse> Process<T>(this IMessageConsumer source,
+        ConsumerInput<T> input, CancellationToken ct = default)
     {
         var serializer = new MessageSerializer();
         var content = serializer.Serialize(input.Content);
         var contentArray = Encoding.UTF8.GetBytes(content);
         using var ms = new MemoryStream(contentArray);
 
-        return source.Process(input, ms, serializer, ct);
+        return source.Consume(input, ms, serializer, ct);
     }
 }

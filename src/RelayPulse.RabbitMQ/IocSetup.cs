@@ -40,6 +40,7 @@ public static class IocSetup
         services.TryAddSingleton<SetupRabbitMq>();
         services.TryAddSingleton<IMessageListener, MessageListener>();
         services.TryAddSingleton<MessageSubscriber>();
+        services.TryAddTransient<NotifyConsumeStateWrapper>();
         
         return services;
     }
@@ -67,6 +68,6 @@ public static class IocSetup
 
 public record RabbitMqRelayHubOptions
 {
-    public string ConfigSectionName { get; init; } = "RelayPulse:RabbitMQ";
-    public RabbitMqSettings? Settings { get; init; }
+    public string ConfigSectionName { get; set; } = "RelayPulse:RabbitMQ";
+    public RabbitMqSettings? Settings { get; set; }
 }

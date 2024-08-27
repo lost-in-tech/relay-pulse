@@ -4,11 +4,11 @@ using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ.Subscribers;
 
-internal static class MessageProcessorInputBuilder
+internal static class ConsumerInputBuilder
 {
-    public static MessageProcessorInput  Build(QueueInfo queueInfo, BasicDeliverEventArgs args)
+    public static ConsumerInput  Build(QueueInfo queueInfo, BasicDeliverEventArgs args)
     {
-        return new MessageProcessorInput
+        return new ConsumerInput
         {
             Queue = queueInfo.Name,
             Type = args.BasicProperties.Type,

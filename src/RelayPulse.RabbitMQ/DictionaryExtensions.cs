@@ -1,5 +1,4 @@
 using System.Text;
-using System.Text.Unicode;
 
 namespace RelayPulse.RabbitMQ;
 
@@ -28,6 +27,13 @@ public static class DictionaryExtensions
         if(expiryInSeconds is null or 0) return;
         
         source[Constants.HeaderExpiryKey] = expiryInSeconds.Value * 1000;
+    }
+    
+    public static void Expiry(this IDictionary<string, object> source, TimeSpan? expiry)
+    {
+        if(expiry is null || expiry.Value == TimeSpan.Zero) return;
+        
+        source[Constants.HeaderExpiryKey] = expiry.Value.TotalMilliseconds;
     }
 
     public static int? Expiry(this IDictionary<string, object> source)

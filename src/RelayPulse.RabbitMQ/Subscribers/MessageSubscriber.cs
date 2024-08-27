@@ -9,6 +9,7 @@ namespace RelayPulse.RabbitMQ.Subscribers;
 internal sealed class MessageSubscriber(
     IServiceProvider sp,
     IMessageSerializer serializer,
+    NotifyConsumeStateWrapper notifier,
     ILogger<MessageSubscriber> logger)
 {
     public async Task Subscribe(IModel channel, QueueInfo queueInfo, BasicDeliverEventArgs args, CancellationToken ct)
@@ -19,9 +20,13 @@ internal sealed class MessageSubscriber(
             args.BasicProperties.AppId,
             args.BasicProperties.CorrelationId);
 
+        ConsumerInput? input = null;
+        
         try
         {
-            var input = MessageProcessorInputBuilder.Build(queueInfo, args);
+            input = ConsumerInputBuilder.Build(queueInfo, args);
+
+            await notifier.Received(input, ct);
 
             using var logScope = logger.BeginScope(new Dictionary<string, object>()
             {
@@ -33,35 +38,37 @@ internal sealed class MessageSubscriber(
             });
 
             using var scope = sp.CreateScope();
-            var processors = scope.ServiceProvider.GetServices<IMessageProcessor>();
+            var processors = scope.ServiceProvider.GetServices<IMessageConsumer>();
 
-            var processor = processors.FirstOrDefault(x => x.IsApplicable(input));
+            var consumer = processors.FirstOrDefault(x => x.IsApplicable(input));
 
-            if (processor == null)
+            if (consumer == null)
             {
-                logger.LogError("No processor available to process this message.");
+                logger.LogError("No consumer available to process this message.");
 
                 if (queueInfo.DeadLetterExchange.HasValue())
                 {
                     logger.LogError(
-                        "Rejecting the message as no processor available to process. Should move to dead letter queue");
+                        "Rejecting the message as no consumer available to process. Should move to dead letter queue");
 
                     channel.BasicReject(args.DeliveryTag, false);
                 }
                 else
                 {
                     logger.LogError(
-                        "No processor available to process the message. As no dead letter exchange active so nack and requeue the message");
+                        "No consumer available to process the message. As no dead letter exchange active so nack and requeue the message");
 
                     channel.BasicNack(args.DeliveryTag, false, true);
                 }
 
+                await notifier.Processed(input, ConsumerResponse.PermanentFailure("NoConsumerDefined"), ct);
+                
                 return;
             }
 
             using var ms = new MemoryStream(args.Body.ToArray());
 
-            var rsp = await processor.Process(input, ms, serializer, ct);
+            var rsp = await consumer.Consume(input, ms, serializer, ct);
 
             if (rsp.Status == MessageProcessStatus.Success)
             {
@@ -78,7 +85,7 @@ internal sealed class MessageSubscriber(
                     args.BasicProperties.Headers ??= new Dictionary<string, object>();
 
                     args.BasicProperties.Headers[Constants.HeaderTargetQueue] = queueInfo.Name;
-                    args.BasicProperties.Headers.Expiry(rsp.RetryAfterInSeconds);
+                    args.BasicProperties.Headers.Expiry(rsp.RetryAfter);
 
                     var retryCount = args.BasicProperties.Headers.RetryCount();
                     args.BasicProperties.Headers.RetryCount(retryCount + 1);
@@ -95,12 +102,19 @@ internal sealed class MessageSubscriber(
                     channel.BasicNack(args.DeliveryTag, false, false);
                 }
             }
+
+            await notifier.Processed(input, rsp, ct);
         }
         catch (Exception e)
         {
             logger.LogError(e, "Processing of message failed with {error} {msgId}", e.Message, args.BasicProperties.MessageId);
 
             channel.BasicReject(args.DeliveryTag, false);
+
+            await notifier.Processed(input ?? new ConsumerInput
+            {
+                Id = args.BasicProperties.MessageId
+            }, ConsumerResponse.PermanentFailure("UnhandledError"), ct);
         }
     }
 }

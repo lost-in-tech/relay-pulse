@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using RabbitMQ.Client;
 
@@ -41,10 +42,11 @@ internal sealed class RabbitMqWrapper
 
 public record BasicPublishInput
 {
-    public required string Exchange { get; init; }
-    public required string RoutingKey { get; init; }
+    public string Exchange { get; set; } = string.Empty;
+    public string RoutingKey { get; set; } = string.Empty;
     
-    public required ReadOnlyMemory<byte> Body { get; init; }
+    public ReadOnlyMemory<byte> Body { get; set; }
     
-    public required IBasicProperties BasicProperties { get; init; }
+    [DisallowNull]
+    public IBasicProperties? BasicProperties { get; set; }
 }

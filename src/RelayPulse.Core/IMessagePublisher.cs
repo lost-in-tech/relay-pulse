@@ -8,5 +8,5 @@ public interface IMessagePublisher
 
 public record MessagePublishResponse
 {
-    public Guid Id { get; init; }
+    public Guid Id { get; set; }
 }

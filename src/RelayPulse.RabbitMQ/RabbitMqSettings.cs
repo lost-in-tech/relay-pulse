@@ -8,88 +8,88 @@ public record RabbitMqSettings :
     IPublisherChannelSettings,
     IQueueSettings
 {
-    public string? AppId { get; init; }
-    public string Uri { get; init; } = string.Empty;
-    public string DefaultExchange { get; init; } = string.Empty;
+    public string? AppId { get; set; }
+    public string Uri { get; set; } = string.Empty;
+    public string DefaultExchange { get; set; } = string.Empty;
     
     /// <summary>
     /// Valid values are null, fanout, direct, topic and headers
     /// </summary>
-    public string? DefaultExchangeType { get; init; }
+    public string? DefaultExchangeType { get; set; }
 
-    public int? DefaultPrefetchCount { get; init; }
+    public int? DefaultPrefetchCount { get; set; }
 
-    public string? DefaultTenant { get; init; }
+    public string? DefaultTenant { get; set; }
     
     /// <summary>
     /// Type prefix to use for type name that system gonna pass in header 
     /// </summary>
-    public string? TypePrefix { get; init; }
+    public string? TypePrefix { get; set; }
     
-    public double? DefaultExpiryInSeconds { get; init; }
+    public double? DefaultExpiryInSeconds { get; set; }
     
-    public string? MessageTypeHeaderName { get; init; }
+    public string? MessageTypeHeaderName { get; set; }
     
-    public string? TenantHeaderName { get; init; }
+    public string? TenantHeaderName { get; set; }
     
-    public string? AppIdHeaderName { get; init; }
+    public string? AppIdHeaderName { get; set; }
 
     /// <summary>
     /// Optional and default is false. When set to true for each message type a new channel will be used
     /// </summary>
-    public bool? UseChannelPerType { get; init; }
+    public bool? UseChannelPerType { get; set; }
 
-    public QueueSettings[]? Queues { get; init; }
+    public QueueSettings[]? Queues { get; set; }
     
-    public string? SentAtHeaderName { get; init; }
+    public string? SentAtHeaderName { get; set; }
 }
 
 public record QueueSettings
 {
-    public bool? SkipSetup { get; init; }
-    public required string Name { get; init; }
+    public bool? SkipSetup { get; set; }
+    public string Name { get; set; } = string.Empty;
     /// <summary>
     /// If empty default exchange name will be used
     /// </summary>
-    public string? Exchange { get; init; }
+    public string? Exchange { get; set; }
     /// <summary>
     /// Valid values are null, fanout, direct, topic and headers
     /// </summary>
-    public string? ExchangeType { get; init; }
+    public string? ExchangeType { get; set; }
 
-    public int? MsgExpiryInSeconds { get; init; }
+    public int? MsgExpiryInSeconds { get; set; }
 
-    public bool DeadLetterDisabled { get; init; }
+    public bool DeadLetterDisabled { get; set; }
     /// <summary>
     /// Default will be "{exchange-name}-dlx if not disabled";
     /// </summary>
-    public string? DeadLetterExchange { get; init; }
+    public string? DeadLetterExchange { get; set; }
     /// <summary>
     /// Default will be "{exchange-name}-dlq if not disabled";
     /// </summary>
-    public string? DeadLetterQueue { get; init; }
+    public string? DeadLetterQueue { get; set; }
 
-    public bool RetryFeatureDisabled { get; init; }
+    public bool RetryFeatureDisabled { get; set; }
     /// <summary>
     /// Default will be "{exchange-name}-rtx if not disabled";
     /// </summary>
-    public string? RetryExchange { get; init; }
+    public string? RetryExchange { get; set; }
     /// <summary>
     /// Default will be "{exchange-name}-rtq if not disabled";
     /// </summary>
-    public string? RetryQueue { get; init; }
+    public string? RetryQueue { get; set; }
     /// <summary>
     /// Default will be 60 seconds
     /// </summary>
-    public int? RetryDelayInSeconds { get; init; }
-    public QueueBinding[]? Bindings { get; init; }
+    public int? RetryDelayInSeconds { get; set; }
+    public QueueBinding[]? Bindings { get; set; }
     
-    public int? PrefetchCount { get; init; }
+    public int? PrefetchCount { get; set; }
 }
 
 public record QueueBinding
 {
-    public bool? MatchAny { get; init; }
-    public string? RoutingKey { get; init; }
-    public Dictionary<string,string>? Headers { get; init; }
+    public bool? MatchAny { get; set; }
+    public string? RoutingKey { get; set; }
+    public Dictionary<string,string>? Headers { get; set; }
 }

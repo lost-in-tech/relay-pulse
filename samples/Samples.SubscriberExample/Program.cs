@@ -9,7 +9,7 @@ builder.Services.AddHostedService<Worker>();
 
 builder.Services.AddRabbitMqRelayPulse(builder.Configuration);
 
-builder.Services.AddScoped<IMessageProcessor, SampleOrderCreatedHandler>();
+builder.Services.AddScoped<IMessageConsumer, SampleOrderCreatedConsumer>();
 
 var host = builder.Build();
 host.Run();

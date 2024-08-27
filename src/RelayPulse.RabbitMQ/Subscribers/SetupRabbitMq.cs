@@ -207,11 +207,11 @@ public interface IQueueSettings
 
 public record QueueInfo
 {
-    public required string Name { get; init; }
-    public required string Exchange { get; init; }
-    public required string ExchangeType { get; init; }
-    public string? DeadLetterExchange { get; init; }
-    public string? RetryExchange { get; init; }
-    public int? PrefetchCount { get; init; }
-    public string? RetryQueue { get; init; }
+    public string Name { get; set; } = String.Empty;
+    public string Exchange { get; set; } = String.Empty;
+    public string ExchangeType { get; set; } = String.Empty;
+    public string? DeadLetterExchange { get; set; }
+    public string? RetryExchange { get; set; }
+    public int? PrefetchCount { get; set; }
+    public string? RetryQueue { get; set; }
 }

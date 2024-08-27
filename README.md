@@ -194,15 +194,15 @@ Now you need to write a handler as below which bound to a specific queue:
 
 ```csharp
 // This handler will execute only when Message received from queue
-public class SampleOrderCreatedHandler : MessageProcessor<OrderCreated>
+public class SampleOrderCreatedHandler : MessageConsumer<OrderCreated>
 {
-    protected override async Task<MessageProcessorResponse> Process(MessageProcessorInput<OrderCreated> input, CancellationToken ct)
+    protected override async Task<ConsumerResponse> Consume(MessageProcessorInput<OrderCreated> input, CancellationToken ct)
     {
         .. process the message
-        return MessageProcessorResponse.Success();
+        return MessageConsumerResponse.Success();
     }
 
-    public override bool IsApplicable(MessageProcessorInput input)
+    public override bool IsApplicable(ConsumerInput input)
     {
         return input.Queue == "email-on-order-completed";
     }
@@ -212,5 +212,35 @@ public class SampleOrderCreatedHandler : MessageProcessor<OrderCreated>
 Make sure you register this handler in your DI. For example:
 
 ```csharp
-services.TryAddEnumerable(ServiceDescription.Transient<IMessageProcessor,SampleOrderCreatedHandler>());
+services.TryAddEnumerable(ServiceDescription.Transient<IMessageConsumer,SampleOrderCreatedHandler>());
+```
+
+# Track message processing state
+
+You can track and push data to other system. All you need to do is 
+implement a notifier class against this interface and register in your IOC.
+Example below:
+
+```csharp
+public class LogConsumeState(ILogger<LogConsumeState> logger) : INotifyConsumeState
+{
+    public Task Received(ConsumerInput input, CancellationToken ct = default)
+    {
+        logger.LogInfo("Receieved message to process with id {msgId}", input.MessageId);
+    }
+
+    public Task Processed(ConsumerInput input, ConsumerResponse response, CancellationToken ct = default)
+    {
+        logger.LogInfo("Completed processing of message to process with id {msgId} and {status}, {reason}", 
+            input.MessageId, 
+            response.Status, 
+            response.Reason);
+    }
+}
+```
+
+Make sure you register this implementation in your IOC.
+
+```csharp
+services.TryAddEnumerable(ServiceDescriptor.Transient<LogConsumeState,INotifyConsumeState>());
 ```
