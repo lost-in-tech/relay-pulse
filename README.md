@@ -244,3 +244,45 @@ Make sure you register this implementation in your IOC.
 ```csharp
 services.TryAddEnumerable(ServiceDescriptor.Transient<LogConsumeState,INotifyConsumeState>());
 ```
+
+
+# How to test Consumer
+
+Say you have a consumer as below:
+
+```csharp
+public class SampleConsumer(IEmailClient emailClient) 
+    : MessageConsumer<OrderCreated>
+{
+    protected override async Task<ConsumerResponse> Consume(
+        ConsumerInput<T> input, 
+        CancellationToken ct)
+    {
+        await emailClient.Send(...);
+        
+        return ConsumerResponse.Success();
+    }
+    
+    public override IsApplicable(ConsumerInput input)
+    {
+        return input.Queue == "bookworms-email-on-order-completed";
+    }
+}
+```
+
+Now you can test his consumer as below using an extension method of IMessageConsumer
+provided as part of `RelayPulse.Core`
+
+```csharp
+var givenFakeEmailClient = substitute.For<IEmailClient>(); // Create a fake email client
+var givenInput = new ConsumerInput<OrderCreated>(new OrderCreated
+    {
+        Id = "order-123"
+    });
+
+var sut = new SampleConsumer(givneFakeEmailClient);
+
+var gotRsp = await sut.Process(givenInput, CancellationToken.None);
+
+gotRsp.Status.ShouldBe(MessageProcessStatus.Success);
+```

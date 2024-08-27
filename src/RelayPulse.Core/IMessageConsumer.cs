@@ -19,9 +19,10 @@ public abstract class MessageConsumer<T> : IMessageConsumer
         IMessageSerializer serializer,
         CancellationToken ct)
     {
-        return Consume(new ConsumerInput<T>
+        var cnt = serializer.Deserialize<T>(content);
+        
+        return Consume(new ConsumerInput<T>(cnt)
         {
-            Content = serializer.Deserialize<T>(content),
             Queue = input.Queue,
             Cid = input.Cid,
             Headers = input.Headers,
@@ -56,10 +57,11 @@ public record ConsumerInput
 
 public record ConsumerInput<T> : ConsumerInput
 {
-    public ConsumerInput()
+    public ConsumerInput(T content)
     {
+        Content = content;
     }
-
+    
     public ConsumerInput(ConsumerInput input, T content)
     {
         Content = content;
