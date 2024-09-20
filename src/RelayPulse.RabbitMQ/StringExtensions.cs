@@ -43,6 +43,13 @@ internal static class StringExtensions
         return string.IsNullOrWhiteSpace(value) ? alternative : value;
     }
     
+    public static bool IsSame(this string? value, string? compareWith)
+    {
+        if (value == null || compareWith == null) return true;
+        
+        return value.Equals(compareWith, StringComparison.OrdinalIgnoreCase);
+    }
+    
     public static string? TryPickNonEmpty(this string? value, params string?[] alternatives)
     {
         if (!string.IsNullOrWhiteSpace(value)) return value;

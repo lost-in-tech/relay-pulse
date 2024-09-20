@@ -22,7 +22,13 @@ public static class IocSetup
         services.TryAddSingleton<IMessagePublishSettings>(sc => MergeSettings(sc, options));
         services.TryAddSingleton<IPublisherChannelSettings>(sc => MergeSettings(sc, options));
         services.TryAddSingleton<IQueueSettings>(sc => MergeSettings(sc, options));
-        
+        services.TryAddSingleton<ITraceKeySettings>(sc => MergeSettings(sc, options));
+
+        services.TryAddScoped<IHttpTraceHeadersProvider,HttpTraceHeadersProvider>();
+        services.TryAddScoped<SubscriberTraceContextProvider>();
+        services.TryAddScoped<ISubscriberTraceContextProvider>(sp => sp.GetRequiredService<SubscriberTraceContextProvider>());
+        services.TryAddScoped<ITraceContextWriter>(sp => sp.GetRequiredService<SubscriberTraceContextProvider>());
+
         services.TryAddSingleton<BasicPropertiesBuilder>();
         services.TryAddSingleton<IUniqueId, UniqueId>();
         services.TryAddSingleton<IClockWrap,ClockWrap>();
@@ -39,6 +45,7 @@ public static class IocSetup
         services.TryAddSingleton<QueueSettingsValidator>();
         services.TryAddSingleton<SetupRabbitMq>();
         services.TryAddSingleton<IMessageListener, MessageListener>();
+        services.TryAddSingleton<ISetupRabbitMq, MessageListener>();
         services.TryAddSingleton<MessageSubscriber>();
         services.TryAddTransient<NotifyConsumeStateWrapper>();
         

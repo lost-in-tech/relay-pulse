@@ -1,0 +1,78 @@
+﻿{
+  "exchangeDeclareCalls": [
+    {
+      "name": "bookworm.orders",
+      "type": "topic"
+    },
+    {
+      "name": "bookworm.orders-dlx",
+      "type": "direct"
+    },
+    {
+      "name": "bookworm.orders-rtx",
+      "type": "direct"
+    }
+  ],
+  "queueDeclareCalls": [
+    {
+      "name": "bookworm.order-created.email",
+      "args": {
+        "x-dead-letter-exchange": "bookworm.orders-dlx",
+        "x-dead-letter-routing-key": "bookworm.order-created.email"
+      }
+    },
+    {
+      "name": "bookworm.order-created.email-dlq",
+      "args": {
+        "x-dead-letter-exchange": "bookworm.orders-rtx",
+        "x-dead-letter-routing-key": "bookworm.order-created.email"
+      }
+    },
+    {
+      "name": "bookworm.order-created.slack",
+      "args": {
+        "x-dead-letter-exchange": "bookworm.orders-dlx",
+        "x-dead-letter-routing-key": "bookworm.order-created.slack"
+      }
+    },
+    {
+      "name": "bookworm.order-created.slack-dlq",
+      "args": {
+        "x-dead-letter-exchange": "bookworm.orders-rtx",
+        "x-dead-letter-routing-key": "bookworm.order-created.slack"
+      }
+    }
+  ],
+  "queueBindCalls": [
+    {
+      "queue": "bookworm.order-created.email-dlq",
+      "exchange": "bookworm.orders-dlx",
+      "routeKey": "bookworm.order-created.email"
+    },
+    {
+      "queue": "bookworm.order-created.email",
+      "exchange": "bookworm.orders-rtx",
+      "routeKey": "bookworm.order-created.email"
+    },
+    {
+      "queue": "bookworm.order-created.email",
+      "exchange": "bookworm.orders",
+      "routeKey": "Bookworm.OrderCreated"
+    },
+    {
+      "queue": "bookworm.order-created.slack-dlq",
+      "exchange": "bookworm.orders-dlx",
+      "routeKey": "bookworm.order-created.slack"
+    },
+    {
+      "queue": "bookworm.order-created.slack",
+      "exchange": "bookworm.orders-rtx",
+      "routeKey": "bookworm.order-created.slack"
+    },
+    {
+      "queue": "bookworm.order-created.slack",
+      "exchange": "bookworm.orders",
+      "routeKey": "Bookworm.OrderCreated"
+    }
+  ]
+}

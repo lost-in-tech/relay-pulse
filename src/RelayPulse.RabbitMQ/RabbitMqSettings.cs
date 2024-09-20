@@ -1,3 +1,4 @@
+using RelayPulse.Core;
 using RelayPulse.RabbitMQ.Subscribers;
 
 namespace RelayPulse.RabbitMQ;
@@ -6,6 +7,7 @@ public record RabbitMqSettings :
     IRabbitMqConnectionSettings, 
     IMessagePublishSettings,
     IPublisherChannelSettings,
+    ITraceKeySettings,
     IQueueSettings
 {
     public string? AppId { get; set; }
@@ -42,6 +44,21 @@ public record RabbitMqSettings :
     public QueueSettings[]? Queues { get; set; }
     
     public string? SentAtHeaderName { get; set; }
+
+
+    #region TraceKeySettings
+
+    public string? AppIdHttpHeaderName { get; set; } = "x-app-id";
+    public string? TraceIdHttpHeaderName { get; set; } = "x-trace-id";
+    public string? TraceIdLogKey { get; set; } = "traceId";
+    public string? AppIdLogKey { get; set; } = "appId";
+    public string? UserIdLogKey { get; set; } = "userId";
+    public string? TenantLogKey { get; set; } = "tenant";
+    public string? ConsumerIdLogKey { get; set; } = "consumerId";
+    public string? QueueLogKey { get; set; } = "queue";
+    public string? MessageIdLogKey { get; set; } = "msgId";
+
+    #endregion
 }
 
 public record QueueSettings
@@ -68,20 +85,13 @@ public record QueueSettings
     /// Default will be "{exchange-name}-dlq if not disabled";
     /// </summary>
     public string? DeadLetterQueue { get; set; }
-
-    public bool RetryFeatureDisabled { get; set; }
-    /// <summary>
-    /// Default will be "{exchange-name}-rtx if not disabled";
-    /// </summary>
+    
+    public bool RetryDisabled { get; set; }
+    
     public string? RetryExchange { get; set; }
-    /// <summary>
-    /// Default will be "{exchange-name}-rtq if not disabled";
-    /// </summary>
-    public string? RetryQueue { get; set; }
-    /// <summary>
-    /// Default will be 60 seconds
-    /// </summary>
-    public int? RetryDelayInSeconds { get; set; }
+    
+    public int? DefaultRetryAfterInSeconds { get; set; }
+    
     public QueueBinding[]? Bindings { get; set; }
     
     public int? PrefetchCount { get; set; }

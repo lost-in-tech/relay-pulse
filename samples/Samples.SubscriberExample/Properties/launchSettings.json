@@ -5,7 +5,11 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "environmentVariables": {
-        "DOTNET_ENVIRONMENT": "Development"
+        "DOTNET_ENVIRONMENT": "Development",
+        "CORECLR_ENABLE_PROFILING": "1",
+        "CORECLR_PROFILER":"{36032161-FFC0-4B61-B559-F6C5D41BAE5A}",
+        "NEWRELIC_INSTALL_PATH":"C:\\Program Files\\New Relic\\.NET Agent\\",
+        "CORECLR_NEWRELIC_HOME":"C:\\ProgramData\\New Relic\\.NET Agent\\"
       }
     }
   }

@@ -5,51 +5,41 @@
       "type": "headers"
     },
     {
-      "name": "non-default-exchange-dlx",
-      "type": "topic"
+      "name": "queue-topic-dlx",
+      "type": "fanout"
     },
     {
-      "name": "non-default-exchange-rtx",
-      "type": "topic"
+      "name": "queue-topic-rtx",
+      "type": "fanout"
     }
   ],
   "queueDeclareCalls": [
     {
-      "name": "non-default-exchange-dlq"
+      "name": "queue-topic-dlq"
     },
     {
-      "name": "retry-queue",
+      "name": "queue-topic-rtq",
       "args": {
-        "x-dead-letter-exchange": "non-default-exchange",
-        "x-message-ttl": 60000
+        "x-dead-letter-exchange": "non-default-exchange"
       }
     },
     {
       "name": "queue-topic",
       "args": {
-        "x-dead-letter-exchange": "non-default-exchange-dlx"
+        "x-dead-letter-exchange": "queue-topic-dlx"
       }
     }
   ],
   "queueBindCalls": [
     {
-      "queue": "non-default-exchange-dlq",
-      "exchange": "non-default-exchange-dlx",
-      "routeKey": "*"
+      "queue": "queue-topic-dlq",
+      "exchange": "queue-topic-dlx",
+      "routeKey": ""
     },
     {
-      "queue": "retry-queue",
-      "exchange": "non-default-exchange-rtx",
-      "routeKey": "*"
-    },
-    {
-      "queue": "queue-topic",
-      "exchange": "non-default-exchange",
-      "routeKey": "",
-      "args": {
-        "x-match": "all",
-        "rp-target-queue": "queue-topic"
-      }
+      "queue": "queue-topic-rtq",
+      "exchange": "queue-topic-rtx",
+      "routeKey": ""
     },
     {
       "queue": "queue-topic",

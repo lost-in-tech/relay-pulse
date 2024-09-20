@@ -11,6 +11,8 @@
         <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.0" />
         <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0"/>
         <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0"/>
+        <PackageReference Include="NewRelic.Agent" Version="10.29.0" />
+        <PackageReference Include="NewRelic.Agent.Api" Version="10.29.0" />
     </ItemGroup>
 
     <ItemGroup>

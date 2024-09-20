@@ -12,7 +12,7 @@ internal static class ConsumerInputBuilder
         {
             Queue = queueInfo.Name,
             Type = args.BasicProperties.Type,
-            Cid = args.BasicProperties.CorrelationId,
+            TraceId = args.BasicProperties.CorrelationId,
             Id = args.BasicProperties.MessageId,
             Tenant = GetHeaderValue(args,Constants.HeaderTenant),
             AppId = args.BasicProperties.AppId,

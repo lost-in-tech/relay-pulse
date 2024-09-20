@@ -255,29 +255,36 @@ public partial class MessagePublisherTests(IocFixture fixture) : IClassFixture<I
         RabbitMqSettings? settings = null,
         IEnumerable<IMessageFilter>? filters = null)
     {
-        var services = fixture.Services(sc =>
+        try
         {
-            if (settings != null)
+            var services = fixture.Services(sc =>
             {
-                sc.Replace(ServiceDescriptor.Singleton<IMessagePublishSettings>(settings));
-            }
-
-            if (filters != null)
-            {
-                foreach (var messageFilter in filters)
+                if (settings != null)
                 {
-                    sc.AddTransient<IMessageFilter>(_ => messageFilter);
+                    sc.Replace(ServiceDescriptor.Singleton<IMessagePublishSettings>(settings));
                 }
-            }
-        });
 
-        var sut = services.GetRequiredService<IMessagePublisher>();
+                if (filters != null)
+                {
+                    foreach (var messageFilter in filters)
+                    {
+                        sc.AddTransient<IMessageFilter>(_ => messageFilter);
+                    }
+                }
+            });
 
-        _ = await sut.Publish(givenMsg);
+            var sut = services.GetRequiredService<IMessagePublisher>();
 
-        var gotCallInfo = services.GetRabbitMqPublishCallInfo<T>();
+            _ = await sut.Publish(givenMsg);
 
-        return gotCallInfo.LastInput;
+            var gotCallInfo = services.GetRabbitMqPublishCallInfo<T>();
+
+            return gotCallInfo.LastInput;
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
     }
 
     public record OrderCreated

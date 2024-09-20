@@ -5,7 +5,7 @@
   "correlationId": "CidFiltered",
   "deliveryMode": 0,
   "headers": {
-    "rp-appid": "AppIdFiltered",
+    "rp-app-id": "AppIdFiltered",
     "rp-tenant": "TenantFiltered",
     "rp-msg-type": "TypeFiltered",
     "rp-sent-at": "2024-08-20T00:00:00.0000000",

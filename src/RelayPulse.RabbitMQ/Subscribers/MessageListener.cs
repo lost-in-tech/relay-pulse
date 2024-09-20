@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using RelayPulse.Core;
@@ -9,12 +10,13 @@ internal sealed class MessageListener(
     QueueSettingsValidator validator,
     IQueueSettings settings,
     IChannelFactory channelFactory,
-    MessageSubscriber subscriber) : IMessageListener, IDisposable
+    MessageSubscriber subscriber,
+    ILogger<MessageListener> logger) : IMessageListener, ISetupRabbitMq, IDisposable
 {
     private QueueInfo[] _queues = Array.Empty<QueueInfo>();
-    private List<IModel> _channels = new();
-    
-    public Task Init(CancellationToken ct)
+    private readonly List<IModel> _channels = new();
+
+    private Task Init()
     {
         validator.Validate(settings);
         
@@ -23,8 +25,10 @@ internal sealed class MessageListener(
         return Task.CompletedTask;
     }
 
-    public Task Listen(CancellationToken ct)
+    public async Task Listen(CancellationToken ct)
     {
+        await Init();
+        
         foreach (var queue in _queues)
         {
             var channel = channelFactory.GetOrCreate(queue.Name);
@@ -46,8 +50,20 @@ internal sealed class MessageListener(
             
             _channels.Add(channel);
         }
+    }
+
+    public async Task ListenUntilCancelled(CancellationToken ct)
+    {
+        logger.LogInformation("Start listening.");
         
-        return Task.CompletedTask;
+        await Listen(ct);
+
+        while (!ct.IsCancellationRequested)
+        {
+            await Task.Delay(10000, ct);
+            
+            logger.LogTrace("Listener listening...");
+        }
     }
 
     public void Dispose()
@@ -61,5 +77,10 @@ internal sealed class MessageListener(
             
             channel.Dispose();
         }
+    }
+
+    Task ISetupRabbitMq.Run(CancellationToken ct)
+    {
+        return Init();
     }
 }

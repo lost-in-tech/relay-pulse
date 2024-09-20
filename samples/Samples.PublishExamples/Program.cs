@@ -22,6 +22,9 @@ while (true)
     var input = Console.ReadLine();
     if(input == string.Empty || input == "x") break;
 
+    
+        
+    
     await publisher.Publish(new Message<OrderCreated>
     {
         Id = Guid.NewGuid(),

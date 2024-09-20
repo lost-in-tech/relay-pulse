@@ -2,6 +2,7 @@ using RelayPulse.Core;
 
 namespace Samples.SubscriberExample;
 
+
 public class SampleOrderCreatedConsumer : MessageConsumer<OrderCreated>
 {
     private Random rnd = new Random();
@@ -10,21 +11,21 @@ public class SampleOrderCreatedConsumer : MessageConsumer<OrderCreated>
     {
         if (input.RetryCount is >= 1 and  <= 2)
         {
-            ConsumerResponse.TransientFailure("try again");
+            return ConsumerResponse.TransientFailure("try again");
         }
         
         Console.WriteLine($"message handled by processor");
 
         var d = rnd.Next(1, 100);
 
-        if (d > 50) return ConsumerResponse.TransientFailure("Api failed");
+        if (d > 50) return ConsumerResponse.TransientFailure("Api failed", TimeSpan.FromMinutes(1));
         
         return ConsumerResponse.Success();
     }
 
     public override bool IsApplicable(ConsumerInput input)
     {
-        return input.Queue == "email-on-order-completed";
+        return input.Queue == "bookworm-email-receipt";
     }
 }
 

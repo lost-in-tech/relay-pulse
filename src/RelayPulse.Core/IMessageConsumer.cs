@@ -24,7 +24,7 @@ public abstract class MessageConsumer<T> : IMessageConsumer
         return Consume(new ConsumerInput<T>(cnt)
         {
             Queue = input.Queue,
-            Cid = input.Cid,
+            TraceId = input.TraceId,
             Headers = input.Headers,
             Id = input.Id,
             Tenant = input.Tenant,
@@ -46,7 +46,7 @@ public record ConsumerInput
     public string Queue { get; set; } = string.Empty;
     public string? Id { get; set; }
     public string? AppId { get; set; }
-    public string? Cid { get; set; }
+    public string? TraceId { get; set; }
     public string? UserId { get; set; }
     public string? Type { get; set; }
     public string? Tenant { get; set; }
@@ -67,7 +67,7 @@ public record ConsumerInput<T> : ConsumerInput
         Content = content;
         Queue = input.Queue;
         Type = input.Type;
-        Cid = input.Cid;
+        TraceId = input.TraceId;
         Id = input.Id;
         Tenant = input.Tenant;
         AppId = input.AppId;

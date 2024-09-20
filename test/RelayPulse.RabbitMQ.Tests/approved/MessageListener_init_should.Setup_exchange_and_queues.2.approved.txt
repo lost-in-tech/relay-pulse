@@ -5,26 +5,41 @@
       "type": "fanout"
     },
     {
-      "name": "non-default-exchange-dlx",
-      "type": "topic"
+      "name": "queue-fanout-dlx",
+      "type": "fanout"
+    },
+    {
+      "name": "queue-fanout-rtx",
+      "type": "fanout"
     }
   ],
   "queueDeclareCalls": [
     {
-      "name": "non-default-exchange-dlq"
+      "name": "queue-fanout-dlq"
+    },
+    {
+      "name": "queue-fanout-rtq",
+      "args": {
+        "x-dead-letter-exchange": "non-default-exchange"
+      }
     },
     {
       "name": "queue-fanout",
       "args": {
-        "x-dead-letter-exchange": "non-default-exchange-dlx"
+        "x-dead-letter-exchange": "queue-fanout-dlx"
       }
     }
   ],
   "queueBindCalls": [
     {
-      "queue": "non-default-exchange-dlq",
-      "exchange": "non-default-exchange-dlx",
-      "routeKey": "*"
+      "queue": "queue-fanout-dlq",
+      "exchange": "queue-fanout-dlx",
+      "routeKey": ""
+    },
+    {
+      "queue": "queue-fanout-rtq",
+      "exchange": "queue-fanout-rtx",
+      "routeKey": ""
     },
     {
       "queue": "queue-fanout",

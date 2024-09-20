@@ -1,3 +1,4 @@
+using RabbitMQ.Client;
 using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ.Subscribers;
@@ -44,28 +45,11 @@ internal sealed class QueueSettingsValidator
                 $"Exchange type not valid. Provide a valid exchange type value. Supported values are {string.Join(", ",ExchangeTypesSupported)}");
         }
 
-        if (!queue.RetryFeatureDisabled)
+        if (exchangeType.IsSame(ExchangeType.Fanout))
         {
-            if (exchangeType == RabbitMQ.ExchangeTypesSupported.Fanout)
+            if (queue.Bindings is { Length: > 0 })
             {
-                throw new RelayPulseException(
-                    $"Retry feature is not supported for fanout exchange. Either change the exchange type or make retry feature disable. query {queue.Name}");
-            }
-
-            if (exchangeType == RabbitMQ.ExchangeTypesSupported.Headers)
-            {
-                var totalBindings = queue.Bindings?.Length ?? 0;
-
-                if (totalBindings == 0)
-                {
-                    throw new RelayPulseException($"For retry feature to work At least one header binding is required. query {queue.Name}");
-                }
-                
-                var anyEmptyHeaderBindings = queue.Bindings?.Any(x => (x.Headers?.Count ?? 0) == 0) ?? false;
-
-                if (anyEmptyHeaderBindings)
-                    throw new RelayPulseException(
-                        $"Header bindings with empty headers not supported when retry feature is enabled for query {queue.Name}");
+                throw new RelayPulseException($"Bindings not supported for exchange type {exchangeType}");
             }
         }
     }
