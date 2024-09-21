@@ -12,6 +12,7 @@ internal sealed class MessageSubscriber(
     ITraceKeySettings traceKeySettings,
     IQueueSettings queueSettings,
     IRabbitMqWrapper wrapper,
+    IAppNameProvider appNameProvider,
     ILogger<MessageSubscriber> logger)
 {
     public async Task Subscribe(IModel channel, QueueInfo queueInfo, BasicDeliverEventArgs args, CancellationToken ct)
@@ -38,7 +39,7 @@ internal sealed class MessageSubscriber(
             {
                 Queue = input.Queue,
                 Tenant = input.Tenant,
-                AppId = queueSettings.AppId,
+                AppId = appNameProvider.Get(),
                 ConsumerId = input.AppId,
                 TraceId = input.TraceId,
                 UserId = input.UserId,

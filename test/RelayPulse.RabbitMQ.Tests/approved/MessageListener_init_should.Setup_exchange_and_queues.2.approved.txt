@@ -5,41 +5,40 @@
       "type": "fanout"
     },
     {
-      "name": "queue-fanout-dlx",
-      "type": "fanout"
+      "name": "non-default-exchange-dlx",
+      "type": "direct"
     },
     {
-      "name": "queue-fanout-rtx",
-      "type": "fanout"
+      "name": "non-default-exchange-rtx",
+      "type": "direct"
     }
   ],
   "queueDeclareCalls": [
     {
-      "name": "queue-fanout-dlq"
-    },
-    {
-      "name": "queue-fanout-rtq",
+      "name": "queue-fanout",
       "args": {
-        "x-dead-letter-exchange": "non-default-exchange"
+        "x-dead-letter-exchange": "non-default-exchange-dlx",
+        "x-dead-letter-routing-key": "queue-fanout"
       }
     },
     {
-      "name": "queue-fanout",
+      "name": "queue-fanout-dlq",
       "args": {
-        "x-dead-letter-exchange": "queue-fanout-dlx"
+        "x-dead-letter-exchange": "non-default-exchange-rtx",
+        "x-dead-letter-routing-key": "queue-fanout"
       }
     }
   ],
   "queueBindCalls": [
     {
       "queue": "queue-fanout-dlq",
-      "exchange": "queue-fanout-dlx",
-      "routeKey": ""
+      "exchange": "non-default-exchange-dlx",
+      "routeKey": "queue-fanout"
     },
     {
-      "queue": "queue-fanout-rtq",
-      "exchange": "queue-fanout-rtx",
-      "routeKey": ""
+      "queue": "queue-fanout",
+      "exchange": "non-default-exchange-rtx",
+      "routeKey": "queue-fanout"
     },
     {
       "queue": "queue-fanout",

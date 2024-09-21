@@ -5,46 +5,40 @@
       "type": "topic"
     },
     {
-      "name": "queue-topic-dlx",
-      "type": "fanout"
+      "name": "non-default-exchange-dlx",
+      "type": "direct"
     },
     {
-      "name": "queue-topic-rtx",
-      "type": "fanout"
+      "name": "non-default-exchange-rtx",
+      "type": "direct"
     }
   ],
   "queueDeclareCalls": [
     {
-      "name": "queue-topic-dlq"
-    },
-    {
-      "name": "queue-topic-rtq",
+      "name": "queue-topic",
       "args": {
-        "x-dead-letter-exchange": "non-default-exchange"
+        "x-dead-letter-exchange": "non-default-exchange-dlx",
+        "x-dead-letter-routing-key": "queue-topic"
       }
     },
     {
-      "name": "queue-topic",
+      "name": "queue-topic-dlq",
       "args": {
-        "x-dead-letter-exchange": "queue-topic-dlx"
+        "x-dead-letter-exchange": "non-default-exchange-rtx",
+        "x-dead-letter-routing-key": "queue-topic"
       }
     }
   ],
   "queueBindCalls": [
     {
       "queue": "queue-topic-dlq",
-      "exchange": "queue-topic-dlx",
-      "routeKey": ""
-    },
-    {
-      "queue": "queue-topic-rtq",
-      "exchange": "queue-topic-rtx",
-      "routeKey": ""
+      "exchange": "non-default-exchange-dlx",
+      "routeKey": "queue-topic"
     },
     {
       "queue": "queue-topic",
-      "exchange": "non-default-exchange",
-      "routeKey": "rp:target:queue-topic"
+      "exchange": "non-default-exchange-rtx",
+      "routeKey": "queue-topic"
     },
     {
       "queue": "queue-topic",

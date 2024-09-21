@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using RelayPulse.Core;
 
 namespace RelayPulse.RabbitMQ.Tests.Fakes;
 
@@ -30,6 +31,7 @@ public sealed class IocFixture
         sc.Replace(ServiceDescriptor.Singleton<IRabbitMqWrapper, FakeRabbitMqWrapper>());
         sc.Replace(ServiceDescriptor.Singleton<IRabbitMqConnectionInstance, FakeRabbitMqConnectionInstance>());
         sc.Replace(ServiceDescriptor.Singleton(typeof(ILogger<>), typeof(FakeLogger<>)));
+        sc.Replace(ServiceDescriptor.Singleton<IAppNameProvider>(_ => new AppNameProvider("test-app")));
         return sc.BuildServiceProvider();
     }
 }

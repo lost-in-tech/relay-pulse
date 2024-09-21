@@ -3,6 +3,7 @@
   "routingKey": "",
   "body": "eyJpZCI6IjEyMyJ9",
   "basicProperties": {
+    "appId": "test-app",
     "contentEncoding": "utf-8",
     "contentType": "application/json",
     "deliveryMode": 0,

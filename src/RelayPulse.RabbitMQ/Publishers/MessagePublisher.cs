@@ -13,6 +13,7 @@ internal sealed class
     IMessageSerializer serializer,
     IUniqueId uniqueId,
     BasicPropertiesBuilder basicPropertiesBuilder,  
+    IAppNameProvider appNameProvider,
     IEnumerable<IMessageFilter> filters)
     : IMessagePublisher
 {
@@ -38,6 +39,11 @@ internal sealed class
 
         var id = msg.Id ?? uniqueId.New();
         var props = basicPropertiesBuilder.Build(id, channel, msg);
+
+        if (string.IsNullOrWhiteSpace(props.AppId))
+        {
+            props.AppId = appNameProvider.Get();
+        }
         
         rabbitMqWrapper.BasicPublish(channel, new BasicPublishInput
         {

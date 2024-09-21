@@ -37,93 +37,93 @@ public class MessageListener_init_should(IocFixture fixture) : IClassFixture<Ioc
 
     public static IEnumerable<object[]> TestData = new TestInput<RabbitMqSettings>[]
     {
-        // new()
-        // {
-        //     Key = "1",
-        //     Scenario = "When default exchange is fanout",
-        //     Data = new RabbitMqSettings
-        //     {
-        //         DefaultExchange = "default-exchange",
-        //         DefaultExchangeType = ExchangeTypesSupported.Fanout,
-        //         Queues =
-        //         [
-        //             new QueueSettings
-        //             {
-        //                 Name = "queue-fanout",
-        //             }
-        //         ]
-        //     }
-        // },
-        // new()
-        // {
-        //     Key = "2",
-        //     Scenario = "When exchange is fanout and name provided as part of queue",
-        //     Data = new RabbitMqSettings
-        //     {
-        //         DefaultExchange = "default-exchange",
-        //         DefaultExchangeType = ExchangeTypesSupported.Headers,
-        //         Queues =
-        //         [
-        //             new QueueSettings
-        //             {
-        //                 Exchange = "non-default-exchange",
-        //                 ExchangeType = ExchangeTypesSupported.Fanout,
-        //                 Name = "queue-fanout"
-        //             }
-        //         ]
-        //     }
-        // },
-        // new()
-        // {
-        //     Key = "3",
-        //     Scenario = "When exchange is topic and name provided as part of queue",
-        //     Data = new RabbitMqSettings
-        //     {
-        //         Queues =
-        //         [
-        //             new QueueSettings
-        //             {
-        //                 Exchange = "non-default-exchange",
-        //                 ExchangeType = ExchangeTypesSupported.Topic,
-        //                 Name = "queue-topic",
-        //                 Bindings =
-        //                 [
-        //                     new QueueBinding
-        //                     {
-        //                         RoutingKey = "test-route-key"
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // },
-        // new()
-        // {
-        //     Key = "4",
-        //     Scenario = "When exchange is header and name provided as part of queue",
-        //     Data = new RabbitMqSettings
-        //     {
-        //         Queues =
-        //         [
-        //             new QueueSettings
-        //             {
-        //                 Exchange = "non-default-exchange",
-        //                 ExchangeType = ExchangeTypesSupported.Headers,
-        //                 Name = "queue-topic",
-        //                 Bindings =
-        //                 [
-        //                     new QueueBinding
-        //                     {
-        //                         MatchAny = true,
-        //                         Headers = new Dictionary<string, string>{
-        //                             ["event-name"] = "order-created"
-        //                         }
-        //                     }
-        //                 ]
-        //             }
-        //         ]
-        //     }
-        // },
+        new()
+        {
+            Key = "1",
+            Scenario = "When default exchange is fanout",
+            Data = new RabbitMqSettings
+            {
+                DefaultExchange = "default-exchange",
+                DefaultExchangeType = ExchangeTypesSupported.Fanout,
+                Queues =
+                [
+                    new QueueSettings
+                    {
+                        Name = "queue-fanout",
+                    }
+                ]
+            }
+        },
+        new()
+        {
+            Key = "2",
+            Scenario = "When exchange is fanout and name provided as part of queue",
+            Data = new RabbitMqSettings
+            {
+                DefaultExchange = "default-exchange",
+                DefaultExchangeType = ExchangeTypesSupported.Headers,
+                Queues =
+                [
+                    new QueueSettings
+                    {
+                        Exchange = "non-default-exchange",
+                        ExchangeType = ExchangeTypesSupported.Fanout,
+                        Name = "queue-fanout"
+                    }
+                ]
+            }
+        },
+        new()
+        {
+            Key = "3",
+            Scenario = "When exchange is topic and name provided as part of queue",
+            Data = new RabbitMqSettings
+            {
+                Queues =
+                [
+                    new QueueSettings
+                    {
+                        Exchange = "non-default-exchange",
+                        ExchangeType = ExchangeTypesSupported.Topic,
+                        Name = "queue-topic",
+                        Bindings =
+                        [
+                            new QueueBinding
+                            {
+                                RoutingKey = "test-route-key"
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        new()
+        {
+            Key = "4",
+            Scenario = "When exchange is header and name provided as part of queue",
+            Data = new RabbitMqSettings
+            {
+                Queues =
+                [
+                    new QueueSettings
+                    {
+                        Exchange = "non-default-exchange",
+                        ExchangeType = ExchangeTypesSupported.Headers,
+                        Name = "queue-header",
+                        Bindings =
+                        [
+                            new QueueBinding
+                            {
+                                MatchAny = true,
+                                Headers = new Dictionary<string, string>{
+                                    ["event-name"] = "order-created"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
         new()
         {
             Key = "5",

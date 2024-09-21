@@ -1,3 +1,4 @@
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -18,12 +19,22 @@ public static class IocSetup
 
         services.Configure<RabbitMqSettings>(configuration.GetSection(options.ConfigSectionName));
 
+        var appId = configuration["appId"] ?? configuration["appName"] ?? configuration["app"];
+        
+        services.TryAddSingleton<IAppNameProvider>(sp =>
+        {
+            var settings = sp.GetService<IMessagePublishSettings>();
+            var queueSettings = sp.GetService<IQueueSettings>();
+            var appName = settings?.AppId ?? queueSettings?.AppId ?? appId;
+            return new AppNameProvider(appName ?? Assembly.GetExecutingAssembly().GetName().Name);
+        });
+        
         services.TryAddSingleton<IRabbitMqConnectionSettings>(sc => MergeSettings(sc, options));
         services.TryAddSingleton<IMessagePublishSettings>(sc => MergeSettings(sc, options));
         services.TryAddSingleton<IPublisherChannelSettings>(sc => MergeSettings(sc, options));
         services.TryAddSingleton<IQueueSettings>(sc => MergeSettings(sc, options));
         services.TryAddSingleton<ITraceKeySettings>(sc => MergeSettings(sc, options));
-
+        
         services.TryAddScoped<IHttpTraceHeadersProvider,HttpTraceHeadersProvider>();
         services.TryAddScoped<SubscriberTraceContextProvider>();
         services.TryAddScoped<ISubscriberTraceContextProvider>(sp => sp.GetRequiredService<SubscriberTraceContextProvider>());

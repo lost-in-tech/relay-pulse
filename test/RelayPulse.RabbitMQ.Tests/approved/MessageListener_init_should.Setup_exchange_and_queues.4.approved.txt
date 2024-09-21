@@ -5,44 +5,43 @@
       "type": "headers"
     },
     {
-      "name": "queue-topic-dlx",
-      "type": "fanout"
+      "name": "non-default-exchange-dlx",
+      "type": "direct"
     },
     {
-      "name": "queue-topic-rtx",
-      "type": "fanout"
+      "name": "non-default-exchange-rtx",
+      "type": "direct"
     }
   ],
   "queueDeclareCalls": [
     {
-      "name": "queue-topic-dlq"
-    },
-    {
-      "name": "queue-topic-rtq",
+      "name": "queue-header",
       "args": {
-        "x-dead-letter-exchange": "non-default-exchange"
+        "x-dead-letter-exchange": "non-default-exchange-dlx",
+        "x-dead-letter-routing-key": "queue-header"
       }
     },
     {
-      "name": "queue-topic",
+      "name": "queue-header-dlq",
       "args": {
-        "x-dead-letter-exchange": "queue-topic-dlx"
+        "x-dead-letter-exchange": "non-default-exchange-rtx",
+        "x-dead-letter-routing-key": "queue-header"
       }
     }
   ],
   "queueBindCalls": [
     {
-      "queue": "queue-topic-dlq",
-      "exchange": "queue-topic-dlx",
-      "routeKey": ""
+      "queue": "queue-header-dlq",
+      "exchange": "non-default-exchange-dlx",
+      "routeKey": "queue-header"
     },
     {
-      "queue": "queue-topic-rtq",
-      "exchange": "queue-topic-rtx",
-      "routeKey": ""
+      "queue": "queue-header",
+      "exchange": "non-default-exchange-rtx",
+      "routeKey": "queue-header"
     },
     {
-      "queue": "queue-topic",
+      "queue": "queue-header",
       "exchange": "non-default-exchange",
       "routeKey": "",
       "args": {
