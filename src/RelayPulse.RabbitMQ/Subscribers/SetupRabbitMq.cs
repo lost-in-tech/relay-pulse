@@ -1,3 +1,5 @@
+using RabbitMQ.Client;
+
 namespace RelayPulse.RabbitMQ.Subscribers;
 
 internal class SetupRabbitMq(
@@ -97,42 +99,33 @@ internal class SetupRabbitMq(
 
             if (exchangeType == ExchangeTypesSupported.Headers)
             {
-                foreach (var binding in queueBinding)
+                if (queueBinding.Length == 0)
                 {
-                    var bindingArgs = new Dictionary<string, object>();
-
-                    var headersToBind = binding.Headers;
-
-                    if (headersToBind == null || headersToBind.Count == 0) continue;
-
-                    foreach (var headerToBind in headersToBind)
-                    {
-                        bindingArgs[headerToBind.Key] = headerToBind.Value;
-                    }
-
-                    if (binding.MatchAny ?? false)
-                    {
-                        bindingArgs[Constants.HeaderMatch] = "any";
-                    }
-                    else
-                    {
-                        bindingArgs[Constants.HeaderMatch] = "all";
-                    }
-
-                    wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, bindingArgs);
+                    wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, null);
+                }
+                else
+                {
+                    SetupHeaderBindings(queueBinding, channel, queue, exchange);
                 }
             }
             else if (exchangeType != ExchangeTypesSupported.Fanout)
             {
-                foreach (var binding in queueBinding)
+                if (queueBinding.Length == 0)
                 {
-                    if (binding.RoutingKey.HasValue())
+                    wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, null);
+                }
+                else
+                {
+                    foreach (var binding in queueBinding)
                     {
-                        wrapper.QueueBind(channel, queue.Name, exchange, binding.RoutingKey, null);
-                    }
-                    else
-                    {
-                        wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, null);
+                        if (binding.RoutingKey.HasValue())
+                        {
+                            wrapper.QueueBind(channel, queue.Name, exchange, binding.RoutingKey, null);
+                        }
+                        else
+                        {
+                            wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, null);
+                        }
                     }
                 }
             }
@@ -154,6 +147,34 @@ internal class SetupRabbitMq(
         }
 
         return result.ToArray();
+    }
+
+    private void SetupHeaderBindings(QueueBinding[] queueBinding, IModel channel, QueueSettings queue, string exchange)
+    {
+        foreach (var binding in queueBinding)
+        {
+            var bindingArgs = new Dictionary<string, object>();
+
+            var headersToBind = binding.Headers;
+
+            if (headersToBind == null || headersToBind.Count == 0) continue;
+
+            foreach (var headerToBind in headersToBind)
+            {
+                bindingArgs[headerToBind.Key] = headerToBind.Value;
+            }
+
+            if (binding.MatchAny ?? false)
+            {
+                bindingArgs[Constants.HeaderMatch] = "any";
+            }
+            else
+            {
+                bindingArgs[Constants.HeaderMatch] = "all";
+            }
+
+            wrapper.QueueBind(channel, queue.Name, exchange, string.Empty, bindingArgs);
+        }
     }
 
     private string DefaultDeadLetterExchange(string queueName) => $"{queueName}-dlx";
