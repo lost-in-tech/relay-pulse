@@ -129,7 +129,7 @@ internal sealed class MessageSubscriber(
         NotifyConsumeStateWrapper notifier)
     {
         using var ms = new MemoryStream(bodyArray);
-
+        ms.Position = 0;
         var rsp = await consumer.Consume(input, ms, serializer, ct);
             
         if (rsp.Status == MessageProcessStatus.Success)
