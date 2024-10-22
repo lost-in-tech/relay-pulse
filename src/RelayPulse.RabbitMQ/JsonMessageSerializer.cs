@@ -12,6 +12,7 @@ internal sealed class MessageSerializer : IMessageSerializer
     public MessageSerializer()
     {
         _options = new JsonSerializerOptions();
+        _options.PropertyNameCaseInsensitive = true;
         _options.Converters.Add(new JsonStringEnumConverter());
         _options.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
         _options.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
