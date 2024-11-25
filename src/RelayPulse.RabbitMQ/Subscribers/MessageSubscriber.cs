@@ -72,7 +72,14 @@ internal sealed class MessageSubscriber(
         {
             logger.LogError(e, "Processing of message failed with {error} {msgId}", e.Message, args.BasicProperties.MessageId);
 
-            channel.BasicReject(args.DeliveryTag, false);
+            if (queueInfo.DeadLetterExchange.HasValue())
+            {
+                channel.BasicReject(args.DeliveryTag, false);
+            }
+            else
+            {
+                channel.BasicReject(args.DeliveryTag, true);
+            }
 
             await notifier.Processed(input ?? new ConsumerInput
             {
