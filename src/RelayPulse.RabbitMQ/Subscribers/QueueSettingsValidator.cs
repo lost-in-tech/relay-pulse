@@ -52,5 +52,32 @@ internal sealed class QueueSettingsValidator
                 throw new RelayPulseException($"Bindings not supported for exchange type {exchangeType}");
             }
         }
+
+        if (!queue.DeadLetterDisabled)
+        {
+            var deadLetterExchangeType =
+                queue.DeadLetterExchangeType.EmptyAlternative(settings.DefaultDeadLetterExchangeType ?? string.Empty);
+
+            if (deadLetterExchangeType != RabbitMQ.ExchangeTypesSupported.Direct
+                && deadLetterExchangeType != RabbitMQ.ExchangeTypesSupported.Topic)
+            {
+                throw new RelayPulseException(
+                    $"Only direct or topic is supported for dead letter exchange type");
+            }
+            
+        
+            if (!queue.RetryDisabled)
+            {
+                var retryExchangeType =
+                    queue.RetryExchangeType.EmptyAlternative(settings.DefaultRetryExchangeType ?? string.Empty);
+
+                if (retryExchangeType != RabbitMQ.ExchangeTypesSupported.Direct
+                    && retryExchangeType != RabbitMQ.ExchangeTypesSupported.Topic)
+                {
+                    throw new RelayPulseException(
+                        $"Only direct or topic is supported for retry exchange type");
+                }
+            }
+        }
     }
 }

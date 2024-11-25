@@ -18,6 +18,11 @@ public record RabbitMqSettings :
     /// Valid values are null, fanout, direct, topic and headers
     /// </summary>
     public string? DefaultExchangeType { get; set; }
+    
+    public string DefaultDeadLetterExchange { get; set; } = string.Empty;
+    public string? DefaultDeadLetterExchangeType { get; set; }
+    public string DefaultRetryExchange { get; set; } = string.Empty;
+    public string? DefaultRetryExchangeType { get; set; }
 
     public int? DefaultPrefetchCount { get; set; }
 
@@ -81,6 +86,8 @@ public record QueueSettings
     /// Default will be "{exchange-name}-dlx if not disabled";
     /// </summary>
     public string? DeadLetterExchange { get; set; }
+    public string? DeadLetterExchangeType { get; set; }
+    public string? DeadLetterRoutingKey { get; set; }
     /// <summary>
     /// Default will be "{exchange-name}-dlq if not disabled";
     /// </summary>
@@ -89,6 +96,7 @@ public record QueueSettings
     public bool RetryDisabled { get; set; }
     
     public string? RetryExchange { get; set; }
+    public string? RetryExchangeType { get; set; }
     
     public int? DefaultRetryAfterInSeconds { get; set; }
     

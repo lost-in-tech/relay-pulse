@@ -10,7 +10,6 @@ internal sealed class MessageSubscriber(
     IServiceProvider sp,
     IMessageSerializer serializer,
     ITraceKeySettings traceKeySettings,
-    IQueueSettings queueSettings,
     IRabbitMqWrapper wrapper,
     IAppNameProvider appNameProvider,
     ILogger<MessageSubscriber> logger)

@@ -21,12 +21,13 @@ appsettings or env or any other source e.g. AWS Parameter store
 
 Sample appsettings as below:
 
-```json
+```csharp
   "RelayPulse": {
     "RabbitMQ": {
       "Uri": "amqp://guest:guest@localhost:5672/",
       "DefaultExchange": "bookworm-events",
       "DefaultExchangeType": "direct"
+      "AppId": null, //optional. this will be pass to message as appid
     }
   }
 ```
@@ -133,12 +134,29 @@ example we defining two queues and bindings. One for exchange type topic and oth
 "RelayPulse": {
     "RabbitMQ": {
       "Uri": "amqp://guest:guest@localhost:5672/",
-      "DefaultExchange": "bookworm-events",
-      "DefaultExchangeType": "direct",
+      "DefaultExchange": "bookworm-events", // optional for subscriber as subscriber can define exchange per queue. Or queue can override what define here
+      "DefaultExchangeType": null, // optiona; for subscriber. default is "direct", valid values are fanout, direct, topic and headers
+      "DefaultDeadLetterExchange": null, //optional
+      "DefaultDeadLetterExchangeType": null, //optional default is direct. valid values direct or topic
+      "DefaultRetryExchange": null, //optional
+      "DefaultRetryExchangeType": null, //optional
+      "DefaultPrefetchCount": null, //optional,
       "Queues": [
         {
+          "SkipSetup": null, // optional default is false. wont setup exchange or queue. just bind it
           "Name": "bookworm-email-receipt",
-          "ExchangeType": "topic",
+          "Exchange": null, // optional. fallback to defaultExchange value. Must need to provide here or defaultExchange value
+          "ExchangeType": "topic", // optional, Valid values are null, fanout, direct, topic and headers
+          "MsgExpiryInSeconds": null, //optional, default expiry of msg in queue
+          "DeadLetterDisabled": false, //optional, default false. When true no deadletter and retry exchange will be used or created
+          "DeadLetterExchange": null, // optional, if not define try to use DefaultDeadLetterExchange. if that one is empty then will use `<exchange>.dlx`
+          "DeadLetterExchangeType": null, //optional, when null will try DefaultDeadLetterExchangeType otherwise defaulted to `direct`
+          "DeadLetterRoutingKey": null, //optional. if not defined than queue name will be used as routing key
+          "DeadLetterQueue": null, //optional. if not defined then `<queue name>.dlq` value will be used
+          "RetryDisabled": false, //optional. by default retry enabled. but when deadletter disabled retry will be always disabled
+          "RetryExchange": null, //optional. when empty will use `DefaultRetryExchange` and if that also empty then use `<exchange>.rtx` name
+          "RetryExchangeType": null, //optional. when empty will use `DefaultRetryExchangeType` and then fallback to `direct` as default          
+          "PrefetchCount": null, //optional. when null fallback to DefaultPrefetchCount
           "Bindings": [
             {
                 "routingKey" : "order-created"
