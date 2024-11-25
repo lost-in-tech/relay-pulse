@@ -56,7 +56,7 @@ internal sealed class QueueSettingsValidator
         if (!queue.DeadLetterDisabled)
         {
             var deadLetterExchangeType =
-                queue.DeadLetterExchangeType.EmptyAlternative(settings.DefaultDeadLetterExchangeType ?? string.Empty);
+                queue.DeadLetterExchangeType.EmptyAlternative(settings.DefaultDeadLetterExchangeType ?? RabbitMQ.ExchangeTypesSupported.Direct);
 
             if (deadLetterExchangeType != RabbitMQ.ExchangeTypesSupported.Direct
                 && deadLetterExchangeType != RabbitMQ.ExchangeTypesSupported.Topic)
@@ -69,7 +69,7 @@ internal sealed class QueueSettingsValidator
             if (!queue.RetryDisabled)
             {
                 var retryExchangeType =
-                    queue.RetryExchangeType.EmptyAlternative(settings.DefaultRetryExchangeType ?? string.Empty);
+                    queue.RetryExchangeType.EmptyAlternative(settings.DefaultRetryExchangeType ?? RabbitMQ.ExchangeTypesSupported.Direct);
 
                 if (retryExchangeType != RabbitMQ.ExchangeTypesSupported.Direct
                     && retryExchangeType != RabbitMQ.ExchangeTypesSupported.Topic)
