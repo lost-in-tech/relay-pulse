@@ -144,7 +144,14 @@ internal sealed class MessageSubscriber(
         }
         else if (rsp.Status == MessageProcessStatus.PermanentFailure)
         {
-            channel.BasicReject(args.DeliveryTag, false);
+            if (queueInfo.DeadLetterExchange.HasValue())
+            {
+                channel.BasicReject(args.DeliveryTag, false);
+            }
+            else
+            {
+                channel.BasicReject(args.DeliveryTag, true);
+            }
         }
         else
         {

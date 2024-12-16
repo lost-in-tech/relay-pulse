@@ -155,7 +155,8 @@ example we defining two queues and bindings. One for exchange type topic and oth
           "DeadLetterQueue": null, //optional. if not defined then `<queue name>.dlq` value will be used
           "RetryDisabled": false, //optional. by default retry enabled. but when deadletter disabled retry will be always disabled
           "RetryExchange": null, //optional. when empty will use `DefaultRetryExchange` and if that also empty then use `<exchange>.rtx` name
-          "RetryExchangeType": null, //optional. when empty will use `DefaultRetryExchangeType` and then fallback to `direct` as default          
+          "RetryExchangeType": null, //optional. when empty will use `DefaultRetryExchangeType` and then fallback to `direct` as default
+          "DefaultRetryAfterInSeconds": null, //optional    
           "PrefetchCount": null, //optional. when null fallback to DefaultPrefetchCount
           "Bindings": [
             {
@@ -169,7 +170,7 @@ example we defining two queues and bindings. One for exchange type topic and oth
           "Bindings": [
             {
               "MatchAny": true,
-              "HeaderBindings": [
+              "Headers": [
                 {
                   "msg-type": "order-created"
                 }
@@ -181,6 +182,11 @@ example we defining two queues and bindings. One for exchange type topic and oth
     }
   }
 ```
+
+> *Note* Some useful header that used to pass information when publish message
+> rp-retry-count, rp-msg-type, "rp-tenant", "rp-app-id"
+> 
+> You have the option to rename the header from settings. 
 
 In example worker class we start listening as below:
 
