@@ -18,6 +18,7 @@ internal static class SettingsMerger
             AppIdHeaderName = configSettings.AppIdHeaderName.TryPickNonEmpty(settings.AppIdHeaderName),
             MessageTypeHeaderName =
                 configSettings.MessageTypeHeaderName.TryPickNonEmpty(settings.MessageTypeHeaderName),
+            MessageTypeValueConverter = configSettings.MessageTypeValueConverter.TryPickNonEmpty(settings.MessageTypeValueConverter),
             DefaultExpiryInSeconds = configSettings.DefaultExpiryInSeconds ?? settings.DefaultExpiryInSeconds,
             UseChannelPerType = configSettings.UseChannelPerType ?? settings.UseChannelPerType,
             Queues = configSettings.Queues ?? settings.Queues,

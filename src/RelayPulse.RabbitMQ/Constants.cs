@@ -29,6 +29,8 @@ internal static class Constants
 
 
     public static string RouteKeyTargetQueue(string queue) => $"rp:target:{queue}";
+    
+    public static string MessageTypeValueConverterSnakeCase = "SnakeCase";
 }
 
 public static class ExchangeTypesSupported

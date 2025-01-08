@@ -88,6 +88,10 @@ internal interface IMessagePublishSettings
     public string? AppId { get; }
     public string DefaultExchange { get; }
     public string? TypePrefix { get; }
+    /// <summary>
+    /// Supported values None, SnakeCase
+    /// </summary>
+    public string? MessageTypeValueConverter { get; }
     public string? MessageTypeHeaderName { get; }
     public string? SentAtHeaderName { get; }
     public string? TenantHeaderName { get; }

@@ -36,7 +36,8 @@ internal sealed class BasicPropertiesBuilder(IMessagePublishSettings settings, I
         var typeFullName = msg.Type.EmptyAlternative(type.FullName.EmptyAlternative(type.Name));
         prop.Type = typeFullName;
 
-        var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(type.Name.ToSnakeCase())}";
+        var isSnakeCaseEnabled = settings.MessageTypeValueConverter.IsSame(Constants.MessageTypeValueConverterSnakeCase);
+        var typeName = $"{settings.TypePrefix}{msg.Type.EmptyAlternative(isSnakeCaseEnabled ? type.Name.ToSnakeCase() : type.Name)}";
         prop.Headers[settings.MessageTypeHeaderName.EmptyAlternative(Constants.HeaderMsgType)] = typeName;
 
         prop.Headers[settings.SentAtHeaderName.EmptyAlternative(Constants.HeaderSentAt)] = clockWrap.UtcNow.ToString("o");

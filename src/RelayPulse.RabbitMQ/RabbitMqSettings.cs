@@ -37,6 +37,12 @@ public record RabbitMqSettings :
     
     public string? MessageTypeHeaderName { get; set; }
     
+    /// <summary>
+    /// Supported values None, SnakeCase
+    /// </summary>
+    
+    public string? MessageTypeValueConverter { get; set; }
+    
     public string? TenantHeaderName { get; set; }
     
     public string? AppIdHeaderName { get; set; }
