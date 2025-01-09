@@ -63,8 +63,9 @@ internal class SetupRabbitMq(
                 queueArgs[Constants.HeaderTimeToLive] = queue.MsgExpiryInSeconds.Value * 1000;
             }
 
-            wrapper.QueueDeclare(channel, queue.Name, queueArgs);
-
+            var queuePrefetchCount = queue.PrefetchCount ?? settings.DefaultPrefetchCount;
+            wrapper.QueueDeclare(channel, queue.Name, queueArgs, queuePrefetchCount);
+            
 
             if (deadLetterExchange.HasValue()
                 && deadLetterQueue.HasValue())

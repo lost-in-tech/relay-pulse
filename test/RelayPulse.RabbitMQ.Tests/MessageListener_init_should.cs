@@ -45,6 +45,7 @@ public class MessageListener_init_should(IocFixture fixture) : IClassFixture<Ioc
             {
                 DefaultExchange = "default-exchange",
                 DefaultExchangeType = ExchangeTypesSupported.Fanout,
+                DefaultPrefetchCount = 10,
                 Queues =
                 [
                     new QueueSettings

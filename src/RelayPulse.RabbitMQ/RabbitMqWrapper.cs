@@ -8,7 +8,7 @@ internal interface IRabbitMqWrapper
 {
     void BasicPublish(IModel channel, BasicPublishInput input);
     void ExchangeDeclare(IModel channel, string name, string type);
-    void QueueDeclare(IModel channel, string queue, Dictionary<string, object>? args);
+    void QueueDeclare(IModel channel, string queue, Dictionary<string, object>? args, int? prefetchCount = null);
     void QueueBind(IModel channel, string queue, string exchange, string routingKey, Dictionary<string, object>? args);
 }
 
@@ -29,9 +29,14 @@ internal sealed class RabbitMqWrapper
         channel.ExchangeDeclare(name, type, true);
     }
 
-    public void QueueDeclare(IModel channel, string queue, Dictionary<string, object>? args)
+    public void QueueDeclare(IModel channel, string queue, Dictionary<string, object>? args, int? prefetchCount)
     {
         channel.QueueDeclare(queue, true, false, false, args);
+
+        if (prefetchCount.HasValue)
+        {
+            channel.BasicQos(0, (ushort)prefetchCount.Value, false);
+        }
     }
 
     public void QueueBind(IModel channel, string queue, string exchange, string routingKey, Dictionary<string, object>? args)
