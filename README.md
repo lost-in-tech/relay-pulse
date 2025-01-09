@@ -140,7 +140,7 @@ example we defining two queues and bindings. One for exchange type topic and oth
       "DefaultDeadLetterExchangeType": null, //optional default is direct. valid values direct or topic
       "DefaultRetryExchange": null, //optional
       "DefaultRetryExchangeType": null, //optional
-      "DefaultPrefetchCount": null, //optional,
+      "DefaultPrefetchCount": null, //optional, default is 5,
       "Queues": [
         {
           "SkipSetup": null, // optional default is false. wont setup exchange or queue. just bind it
