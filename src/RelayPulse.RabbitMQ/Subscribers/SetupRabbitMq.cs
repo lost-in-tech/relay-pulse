@@ -63,8 +63,7 @@ internal class SetupRabbitMq(
                 queueArgs[Constants.HeaderTimeToLive] = queue.MsgExpiryInSeconds.Value * 1000;
             }
 
-            var queuePrefetchCount = queue.PrefetchCount ?? settings.DefaultPrefetchCount ?? 5;
-            wrapper.QueueDeclare(channel, queue.Name, queueArgs, queuePrefetchCount);
+            wrapper.QueueDeclare(channel, queue.Name, queueArgs);
             
 
             if (deadLetterExchange.HasValue()
@@ -154,7 +153,7 @@ internal class SetupRabbitMq(
                 Name = queue.Name,
                 DeadLetterExchange = deadLetterExchange,
                 RetryExchange = retryExchange,
-                PrefetchCount = queue.PrefetchCount ?? settings.DefaultPrefetchCount,
+                PrefetchCount = queue.PrefetchCount ?? settings.DefaultPrefetchCount ?? 5,
                 DefaultRetryAfterInSeconds = queue.DefaultRetryAfterInSeconds
             });
         }

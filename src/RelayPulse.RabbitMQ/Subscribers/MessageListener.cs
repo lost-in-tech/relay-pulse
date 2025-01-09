@@ -40,13 +40,13 @@ internal sealed class MessageListener(
             {
                 await subscriber.Subscribe(channel, queue, args, ct);
             };
-
-            channel.BasicConsume(queue.Name, false, Guid.NewGuid().ToString(), false, false, null, consumer);
-
+            
             if (queue.PrefetchCount is > 0)
             {
                 channel.BasicQos(0, (ushort)queue.PrefetchCount.Value, false);
             }
+
+            channel.BasicConsume(queue.Name, false, Guid.NewGuid().ToString(), false, false, null, consumer);
             
             _channels.Add(channel);
         }

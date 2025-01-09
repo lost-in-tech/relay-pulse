@@ -52,13 +52,12 @@ public class FakeRabbitMqWrapper(IMessageSerializer serializer) : IRabbitMqWrapp
         });
     }
 
-    public void QueueDeclare(IModel channel, string queue, Dictionary<string, object>? args, int? prefetchCount)
+    public void QueueDeclare(IModel channel, string queue, Dictionary<string, object>? args)
     {
         _queueDeclareCalls.Add(new QueueDeclareCallInfo
         {
             Name = queue,
-            Args = args,
-            PrefetchCount = prefetchCount
+            Args = args
         });
     }
 
@@ -93,7 +92,6 @@ public class QueueDeclareCallInfo
 {
     public required string Name { get; init; }
     public required Dictionary<string,object>? Args { get; init; }
-    public int? PrefetchCount { get; init; }
 }
 
 public class QueueBindCallInfo
