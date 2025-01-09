@@ -19,7 +19,8 @@
       "args": {
         "x-dead-letter-exchange": "non-default-exchange-dlx",
         "x-dead-letter-routing-key": "queue-fanout"
-      }
+      },
+      "prefetchCount": 5
     },
     {
       "name": "queue-fanout-dlq",
