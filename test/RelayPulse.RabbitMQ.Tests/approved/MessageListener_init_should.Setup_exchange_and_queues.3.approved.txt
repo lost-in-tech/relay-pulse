@@ -19,8 +19,7 @@
       "args": {
         "x-dead-letter-exchange": "non-default-exchange-dlx",
         "x-dead-letter-routing-key": "queue-topic"
-      },
-      "prefetchCount": 5
+      }
     },
     {
       "name": "queue-topic-dlq",

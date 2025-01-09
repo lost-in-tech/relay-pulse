@@ -20,6 +20,7 @@
         "x-dead-letter-exchange": "bookworm.orders-dlx",
         "x-dead-letter-routing-key": "bookworm.order-created.email"
       }
+      "prefetchCount": 5
     },
     {
       "name": "bookworm.order-created.email-dlq",
@@ -34,6 +35,7 @@
         "x-dead-letter-exchange": "bookworm.orders-dlx",
         "x-dead-letter-routing-key": "bookworm.order-created.slack"
       }
+      "prefetchCount": 5
     },
     {
       "name": "bookworm.order-created.slack-dlq",

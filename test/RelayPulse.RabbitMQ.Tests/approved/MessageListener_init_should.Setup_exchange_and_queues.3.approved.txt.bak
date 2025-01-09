@@ -2,7 +2,7 @@
   "exchangeDeclareCalls": [
     {
       "name": "non-default-exchange",
-      "type": "fanout"
+      "type": "topic"
     },
     {
       "name": "non-default-exchange-dlx",
@@ -15,35 +15,36 @@
   ],
   "queueDeclareCalls": [
     {
-      "name": "queue-fanout",
+      "name": "queue-topic",
       "args": {
         "x-dead-letter-exchange": "non-default-exchange-dlx",
-        "x-dead-letter-routing-key": "queue-fanout"
+        "x-dead-letter-routing-key": "queue-topic"
       }
+      "prefetchCount": 5
     },
     {
-      "name": "queue-fanout-dlq",
+      "name": "queue-topic-dlq",
       "args": {
         "x-dead-letter-exchange": "non-default-exchange-rtx",
-        "x-dead-letter-routing-key": "queue-fanout"
+        "x-dead-letter-routing-key": "queue-topic"
       }
     }
   ],
   "queueBindCalls": [
     {
-      "queue": "queue-fanout-dlq",
+      "queue": "queue-topic-dlq",
       "exchange": "non-default-exchange-dlx",
-      "routeKey": "queue-fanout"
+      "routeKey": "queue-topic"
     },
     {
-      "queue": "queue-fanout",
+      "queue": "queue-topic",
       "exchange": "non-default-exchange-rtx",
-      "routeKey": "queue-fanout"
+      "routeKey": "queue-topic"
     },
     {
-      "queue": "queue-fanout",
+      "queue": "queue-topic",
       "exchange": "non-default-exchange",
-      "routeKey": ""
+      "routeKey": "test-route-key"
     }
   ]
 }

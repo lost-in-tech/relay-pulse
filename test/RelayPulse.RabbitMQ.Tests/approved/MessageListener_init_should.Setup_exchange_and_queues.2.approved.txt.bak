@@ -1,15 +1,15 @@
 ﻿{
   "exchangeDeclareCalls": [
     {
-      "name": "default-exchange",
+      "name": "non-default-exchange",
       "type": "fanout"
     },
     {
-      "name": "default-exchange-dlx",
+      "name": "non-default-exchange-dlx",
       "type": "direct"
     },
     {
-      "name": "default-exchange-rtx",
+      "name": "non-default-exchange-rtx",
       "type": "direct"
     }
   ],
@@ -17,14 +17,15 @@
     {
       "name": "queue-fanout",
       "args": {
-        "x-dead-letter-exchange": "default-exchange-dlx",
+        "x-dead-letter-exchange": "non-default-exchange-dlx",
         "x-dead-letter-routing-key": "queue-fanout"
       }
+      "prefetchCount": 5
     },
     {
       "name": "queue-fanout-dlq",
       "args": {
-        "x-dead-letter-exchange": "default-exchange-rtx",
+        "x-dead-letter-exchange": "non-default-exchange-rtx",
         "x-dead-letter-routing-key": "queue-fanout"
       }
     }
@@ -32,17 +33,17 @@
   "queueBindCalls": [
     {
       "queue": "queue-fanout-dlq",
-      "exchange": "default-exchange-dlx",
+      "exchange": "non-default-exchange-dlx",
       "routeKey": "queue-fanout"
     },
     {
       "queue": "queue-fanout",
-      "exchange": "default-exchange-rtx",
+      "exchange": "non-default-exchange-rtx",
       "routeKey": "queue-fanout"
     },
     {
       "queue": "queue-fanout",
-      "exchange": "default-exchange",
+      "exchange": "non-default-exchange",
       "routeKey": ""
     }
   ]
