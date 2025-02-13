@@ -191,25 +191,11 @@ example we defining two queues and bindings. One for exchange type topic and oth
 In example worker class we start listening as below:
 
 ```csharp
-public class Worker : BackgroundService
+public class Worker(IMessageListener messageListener) : BackgroundService
 {
-    private readonly IMessageListener _listener;
-
-    public Worker(IMessageListener listener)
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _listener = listener;
-    }
-
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-    {
-        await _listener.Init(stoppingToken);
-        await _listener.Listen(stoppingToken);
-        
-        while (!stoppingToken.IsCancellationRequested)
-        {
-
-            await Task.Delay(1000, stoppingToken);
-        }
+        return messageListener.ListenUntilCancelled(stoppingToken);
     }
 }
 ```
